@@ -124,9 +124,11 @@ def start_scraping():
     implemented_sites = []
     for site in sites:
         company_name = site.get('name', '')
-        # 部分一致で実装済み企業を確認
-        if any(impl_name in company_name or company_name in impl_name 
-               for impl_name in IMPLEMENTED_COMPANIES):
+        # 文字化けなどを補正して正規化した名前を取得
+        company_name_normalized = normalize_company_name(company_name)
+        
+        # 正規化後の企業名が実装済み18社に含まれているか確認
+        if company_name_normalized in IMPLEMENTED_COMPANIES:
             implemented_sites.append(site)
     
     # スクレイピング実行
