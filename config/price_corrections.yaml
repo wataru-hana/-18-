@@ -1,0 +1,487 @@
+corrections:
+  有限会社　八尾アルミセンター:
+    remove:
+    - 雑旋
+    - 鉛バッテリー
+    - ステンレス304
+    add:
+    - material: 電線80%
+      price: 1260円
+    - material: 電線60%
+      price: 890円
+    modify:
+    - material: 砲金
+      price: '1460'
+    - material: 真鍮
+      price: '1130'
+    - material: 雑線80%
+      price: '1300'
+    - material: 雑線60%-65%
+      price: '900'
+    - material: アルミ缶　プレス
+      price: '335'
+  大畑商事（千葉・大阪）:
+    remove:
+    - 雑旋
+    modify:
+    - material: SUS304
+      price: 170円/kg（税込）
+    - material: アルミ缶バラ
+      price: アルミ缶プレス
+      material_new: アルミ缶プレス
+    - material: 鉛バッテリー
+      price: 105円/kg（税込）
+  株式会社 ヒラノヤ:
+    add:
+    - material: 並銅
+      price: 1,560円
+    - material: 砲金
+      price: 1,430円
+    - material: 真鍮
+      price: 1,050円
+    - material: 銅線（80%以上）
+      price: 1,240円
+    - material: 銅線（60%以上）
+      price: 930円
+    - material: VA線
+      price: 700円
+    - material: アルミホイール
+      price: 350円
+    modify:
+    - material: 並銅
+      price: '1630'
+    - material: 砲金
+      price: '1460'
+    - material: 真鍮
+      price: '1080'
+    - material: 雑線80%
+      price: '1300'
+    - material: 雑線60%-65%
+      price: '960'
+    - material: VA線
+      price: '720'
+    - material: アルミホイール
+      price: '370'
+    - material: アルミ缶　プレス
+      price: '150'
+  木村金属（大阪）:
+    remove:
+    - 雑旋
+    - ステンレス304
+    modify:
+    - material: 波銅
+      price: 1640円/kg(税込)
+      material_new: 並銅
+  株式会社鳳山:
+    add:
+    - material: ピカ線
+      price: 1716円
+    - material: 込銅
+      price: 1617円
+    - material: 一本線(A)
+      price: 1320円
+    - material: 一本線(C)
+      price: 968円
+    - material: アルミサッシ
+      price: 352円
+    - material: 砲金
+      price: 1496円
+    modify:
+    - material: アルミホイール
+      price: 352円
+    - material: 真鍮
+      price: 1089円
+    - material: SUS304
+      price: 176円
+    - material: 鉛バッテリー
+      price: 96円
+    - material: 雑線60%-65%
+      price: '968'
+  千福商会（大阪）:
+    add:
+    - material: アルミサッシ
+      price: 320円
+    - material: ピカ線
+      price: 1650円
+    - material: 並銅
+      price: 1560円
+    - material: 銅線A（80%↑）
+      price: 1250円
+    - material: 銅線C（60%↑）
+      price: 930円
+    - material: VA線
+      price: 700円
+    - material: 砲金
+      price: 1450円
+    - material: 込真鍮
+      price: 1050円
+    modify:
+    - material: アルミホイール
+      price: '390'
+    - material: SUS304
+      price: 170円
+      material_new: SUS304（ステンレス屑）
+    - material: 砲金
+      price: '1460'
+    - material: 雑線80%
+      price: '1300'
+    - material: 雑線60%-65%
+      price: '960'
+    - material: VA線
+      price: '720'
+    - material: アルミサッシ
+      price: '340'
+    - material: ステンレス304
+      price: '175'
+  土金（大阪）:
+    remove:
+    - アルミホイール
+    add:
+    - material: 並銅
+      price: 1610円
+    - material: 雑線S（80%）
+      price: 1310円
+    - material: 雑線A（60%）
+      price: 990円
+    - material: 砲金
+      price: 1450円
+    modify:
+    - material: ピカ銅
+      price: 1710円
+      material_new: ピカ銅（上銅）
+    - material: 真鍮
+      price: '1090'
+    - material: SUS304
+      price: 180円
+      material_new: SUS304（ステンレス上）
+    - material: 鉛バッテリー
+      price: 100円
+    - material: VA線
+      price: '740'
+    - material: アルミ缶　バラ
+      price: '150'
+    - material: アルミ缶　プレス
+      price: '240'
+  株式会社 春日商会　富山支店:
+    remove:
+    - 雑旋
+    add:
+    - material: 一本線
+      price: 1236円/kg
+    - material: 三本線
+      price: 926円/kg
+    modify:
+    - material: 波銅
+      price: 並銅
+      material_new: 並銅
+    - material: SUS304
+      price: 181円/kg
+      material_new: SUS304 （ステンレス）
+    - material: アルミ缶バラ
+      price: アルミ缶プレス
+      material_new: アルミ缶プレス
+    - material: 鉛バッテリー
+      price: 109円/kg
+  株式会社 春日商会　滋賀支店:
+    remove:
+    - 雑旋
+    add:
+    - material: 一本線
+      price: 1238円/kg
+    - material: 三本線
+      price: 928円/kg
+    modify:
+    - material: 波銅
+      price: 並銅
+      material_new: 並銅
+    - material: SUS304
+      price: 183円/kg
+      material_new: SUS304 （ステンレス）
+    - material: アルミ缶バラ
+      price: アルミ缶プレス
+      material_new: アルミ缶プレス
+    - material: 鉛バッテリー
+      price: 111円/kg
+  株式会社 春日商会　一宮本社:
+    remove:
+    - 雑旋
+    add:
+    - material: 一本線
+      price: 1240円/kg
+    - material: 三本線
+      price: 930円/kg
+    modify:
+    - material: 波銅
+      price: 並銅
+      material_new: 並銅
+    - material: SUS304
+      price: 185円/kg
+      material_new: SUS304 （ステンレス）
+    - material: アルミ缶バラ
+      price: アルミ缶プレス
+      material_new: アルミ缶プレス
+    - material: 鉛バッテリー
+      price: 113円/kg
+    - material: 雑線60%-65%
+      price: '945'
+    - material: アルミ缶　プレス
+      price: '315'
+  東北キング:
+    remove:
+    - 雑旋
+    - VA線
+    add:
+    - material: 上線（80%）
+      price: 1,298円/kg
+    - material: 上線（60%）
+      price: 952円/kg
+    - material: VA線
+      price: 402円/kg
+    - material: アルミホイール
+      price: 385円/kg
+    - material: アルミ（63S）
+      price: 337円/kg
+    - material: ステンレス（304系）
+      price: 150円/kg
+    - material: 砲金コロ
+      price: 1524円/kg
+    - material: 込真鍮
+      price: 1106円/kg
+    - material: 車バッテリー
+      price: 77円/kg
+    modify:
+    - material: 波銅
+      price: 1,639円/kg
+      material_new: 並銅
+    - material: アルミホイール
+      price: '402'
+    - material: 鉛バッテリー
+      price: '77'
+    - material: ステンレス304
+      price: '150'
+  眞田鋼業株式会社:
+    add:
+    - material: ピカ銅
+      price: 1550円/kg
+    - material: 並銅
+      price: 1500円/kg
+    - material: 砲金
+      price: 1300円/kg
+    - material: 雑線80%
+      price: 1180円/kg
+    - material: 雑線60%-65%
+      price: 840円/kg
+    - material: VA線
+      price: 680円/kg
+    - material: アルミホイール
+      price: 300円/kg
+    - material: アルミサッシ
+      price: 300円/kg
+    - material: アルミ缶プレス
+      price: 280円/kg
+    - material: ステンレス304
+      price: 160円/kg
+    - material: 鉛バッテリー
+      price: 90円/kg
+    modify:
+    - material: 並銅
+      price: '1500'
+    - material: ステンレス304
+      price: '160'
+  明鑫貿易株式会社:
+    add:
+    - material: ピカ銅
+      price: 1650円/kg
+    - material: 並銅
+      price: 1590円/kg
+    - material: 砲金
+      price: 1410円/kg
+    - material: 真鍮
+      price: 1070円/kg
+    - material: 雑線80%
+      price: 1240円/kg
+    - material: 雑線60%-65%
+      price: 910円/kg
+    - material: VA線
+      price: 730円/kg
+    - material: アルミホイール
+      price: 390円/kg
+    - material: アルミサッシ
+      price: 350円/kg
+    - material: アルミ缶バラ
+      price: 240円/kg
+    - material: アルミ缶プレス
+      price: 280円/kg
+    - material: ステンレス304
+      price: 150円/kg
+    - material: 鉛バッテリー
+      price: 105円/kg
+    modify:
+    - material: ピカ銅
+      price: '1690'
+    - material: 雑線80%
+      price: '1250'
+    - material: 雑線60%-65%
+      price: '910'
+    - material: アルミサッシ
+      price: '360'
+    - material: アルミ缶　バラ
+      price: '240'
+    - material: アルミ缶　プレス
+      price: '280'
+    - material: ステンレス304
+      price: '150'
+  東起産業（株）:
+    add:
+    - material: ピカ銅
+      price: 1720円/kg
+    - material: 並銅
+      price: 1650円/kg
+    - material: 砲金
+      price: 1400円/kg
+    - material: 真鍮
+      price: 1100円/kg
+    - material: 雑線80%
+      price: 1300円/kg
+    - material: 雑線60%-65%
+      price: 950円/kg
+    - material: VA線
+      price: 400円/kg
+    - material: アルミホイール
+      price: 380円/kg
+    - material: アルミサッシ
+      price: 350円/kg
+    - material: アルミ缶バラ
+      price: 150円/kg
+    - material: ステンレス304
+      price: 170円/kg
+    - material: 鉛バッテリー
+      price: 110円/kg
+    modify:
+    - material: ピカ銅
+      price: '1730'
+    - material: 砲金
+      price: '1450'
+    - material: 雑線60%-65%
+      price: '950'
+    - material: VA線
+      price: '710'
+    - material: アルミホイール
+      price: '400'
+    - material: アルミサッシ
+      price: '380'
+    - material: ステンレス304
+      price: '170'
+  鴻祥貿易株式会社:
+    add:
+    - material: ピカ銅
+      price: 1700円/kg
+    - material: 並銅
+      price: 1600円/kg
+    - material: 真鍮
+      price: 1520円/kg
+    - material: 雑線80%
+      price: 1300円/kg
+    - material: 雑線60%-65%
+      price: 950円/kg
+    - material: VA線
+      price: 700円/kg
+    - material: アルミホイール
+      price: 380円/kg
+    - material: アルミサッシ
+      price: 360円/kg
+    - material: アルミ缶バラ
+      price: 280円/kg
+    - material: アルミ缶プレス
+      price: 280円/kg
+    - material: ステンレス304
+      price: 175円/kg
+    - material: 鉛バッテリー
+      price: 108円/kg
+    modify:
+    - material: ステンレス304
+      price: '175'
+  安城貿易（愛知）:
+    add:
+    - material: ピカ銅
+      price: 1700円/kg
+    - material: 並銅
+      price: 1600円/kg
+    - material: 砲金
+      price: 1430円/kg
+    - material: 真鍮
+      price: 1070円/kg
+    - material: 雑線80%
+      price: 1200円/kg
+    - material: 雑線60%-65%
+      price: 900円/kg
+    - material: VA線
+      price: 700円/kg
+    - material: アルミホイール
+      price: 370円/kg
+    - material: アルミサッシ
+      price: 340円/kg
+    - material: アルミ缶バラ
+      price: 180円/kg
+    - material: アルミ缶プレス
+      price: 260円/kg
+    - material: 鉛バッテリー
+      price: 105円/kg
+    modify:
+    - material: 砲金
+      price: '1470'
+    - material: 雑線80%
+      price: '1270'
+    - material: 雑線60%-65%
+      price: '920'
+    - material: VA線
+      price: '730'
+    - material: アルミホイール
+      price: '385'
+    - material: アルミサッシ
+      price: '350'
+    - material: アルミ缶　プレス
+      price: '260'
+    - material: ステンレス304
+      price: '170'
+  株式会社八木:
+    remove:
+    - 雑旋
+    - 鉛バッテリー
+    modify:
+    - material: 波銅
+      price: 1570円/kg
+      material_new: 並銅
+    - material: 雑線60-65%
+      price: 930円/kg
+      material_new: 雑線60%
+    - material: 真鍮
+      price: '1080'
+    - material: 並銅
+      price: '1600'
+    - material: 雑線80%
+      price: '1300'
+    - material: 雑線60%-65%
+      price: '960'
+    - material: ステンレス304
+      price: '170'
+  有限会社金田商事:
+    remove:
+    - 雑旋
+    modify:
+    - material: 波銅
+      price: 1,650円/kg超
+      material_new: 並銅
+    - material: 真鍮
+      price: '1180'
+      material_new: 真鍮(上)A
+    - material: 鉛バッテリー
+      price: 94円/kg超
+    - material: 並銅
+      price: '1680'
+    - material: アルミサッシ
+      price: '346'
+    - material: アルミ缶　プレス
+      price: '296'
+    - material: ステンレス304
+      price: '176'
