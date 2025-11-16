@@ -128,20 +128,24 @@ def start_scraping():
         company_name_normalized = normalize_company_name(company_name)
         
         # 正規化後の企業名が実装済み18社に含まれているか確認
+        # 完全一致または部分一致で確認
+        is_implemented = False
         if company_name_normalized in IMPLEMENTED_COMPANIES:
+            is_implemented = True
+        else:
+            # 部分一致で確認（文字化けなどで完全一致しない場合のフォールバック）
+            for impl_name in IMPLEMENTED_COMPANIES:
+                # 正規化した実装済み企業名と比較
+                impl_normalized = normalize_company_name(impl_name)
+                if (impl_normalized in company_name_normalized or 
+                    company_name_normalized in impl_normalized or
+                    impl_name in company_name_normalized or
+                    company_name_normalized in impl_name):
+                    is_implemented = True
+                    break
+        
+        if is_implemented:
             implemented_sites.append(site)
-    
-    # デバッグ用: 実際に処理対象となっている企業名をログに出力
-    try:
-        debug_names = [normalize_company_name(site.get('name', '')) for site in implemented_sites]
-        # f文字列ではなく format を使うことで、環境依存の文字コード問題を避ける
-        debug_message = "[SCRAPE] Implemented companies on server ({0}): {1}".format(
-            len(debug_names), debug_names
-        )
-        print(debug_message, flush=True)
-    except Exception:
-        # ログ出力で例外が出てもスクレイピング自体は続行する
-        pass
     
     # スクレイピング実行
     for site_config in implemented_sites:
