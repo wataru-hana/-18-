@@ -134,11 +134,11 @@ def start_scraping():
     # デバッグ用: 実際に処理対象となっている企業名をログに出力
     try:
         debug_names = [normalize_company_name(site.get('name', '')) for site in implemented_sites]
-        print(f\"[SCRAPE] Implemented companies on server ({len(debug_names)}): {debug_names}\", flush=True)
+        print(f"[SCRAPE] Implemented companies on server ({len(debug_names)}): {debug_names}", flush=True)
     except Exception:
         # ログ出力で例外が出てもスクレイピング自体は続行する
         pass
-    
+        
     # スクレイピング実行
     for site_config in implemented_sites:
         company_name = site_config.get('name', '不明')
