@@ -73,6 +73,10 @@ corrections:
       price: 1640円/kg(税込)
       material_new: 並銅
   株式会社鳳山:
+    remove:
+    - 雑線80%
+    - ピカ銅
+    - 波銅
     add:
     - material: ピカ線
       price: 1716円
