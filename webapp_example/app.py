@@ -215,10 +215,14 @@ def start_scraping():
     
     db.session.commit()
     
+    # 各材料の最高価格を計算
+    max_prices = calculate_max_prices()
+    
     return jsonify({
         'status': 'completed',
         'results': results,
-        'total': len(results)
+        'total': len(results),
+        'max_prices': max_prices
     })
 
 @app.route('/api/results')
@@ -261,6 +265,78 @@ def get_latest_results():
     
     return jsonify(results)
 
+@app.route('/api/results/max-prices')
+def get_max_prices():
+    """各材料の最高価格を取得"""
+    max_prices = calculate_max_prices()
+    return jsonify(max_prices)
+
+def calculate_max_prices():
+    """各材料の最高価格を計算"""
+    # 最新のスクレイピング時刻を取得
+    latest_scrape_time = db.session.query(db.func.max(PriceData.scraped_at)).scalar()
+    
+    if not latest_scrape_time:
+        return []
+    
+    # 最新のスクレイピング結果のみを取得
+    latest_prices = PriceData.query.filter_by(scraped_at=latest_scrape_time).all()
+    
+    # 材料ごとに価格を集計
+    material_prices = {}
+    for price_data in latest_prices:
+        material_name = price_data.material_name
+        price_str = price_data.price
+        
+        # 価格文字列から数値を抽出
+        price_value = extract_price_number(price_str)
+        
+        if price_value is not None:
+            if material_name not in material_prices:
+                material_prices[material_name] = []
+            
+            material_prices[material_name].append({
+                'company': price_data.company.name,
+                'region': price_data.company.region,
+                'price': price_value,
+                'price_str': price_str
+            })
+    
+    # 各材料の最高価格を計算
+    max_prices_list = []
+    for material_name, prices in material_prices.items():
+        if prices:
+            # 最高価格を取得
+            max_price_item = max(prices, key=lambda x: x['price'])
+            max_prices_list.append({
+                'material': material_name,
+                'max_price': max_price_item['price_str'],
+                'max_price_value': max_price_item['price'],
+                'company': max_price_item['company'],
+                'region': max_price_item['region']
+            })
+    
+    # 材料名でソート
+    max_prices_list.sort(key=lambda x: x['material'])
+    
+    return max_prices_list
+
+def extract_price_number(price_str):
+    """価格文字列から数値を抽出"""
+    if not price_str:
+        return None
+    
+    # 数値を抽出（カンマや円マークを除去）
+    import re
+    price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', str(price_str))
+    if price_match:
+        price_value = price_match.group(1).replace(',', '').replace('，', '')
+        try:
+            return float(price_value)
+        except ValueError:
+            return None
+    return None
+
 @app.route('/api/download/excel')
 def download_excel():
     """Excelファイルをダウンロード"""
@@ -290,6 +366,26 @@ def download_excel():
         ws.cell(row=row_idx, column=3, value=price_data.material_name)
         ws.cell(row=row_idx, column=4, value=price_data.price)
         ws.cell(row=row_idx, column=5, value=price_data.scraped_at.isoformat() if price_data.scraped_at else '')
+    
+    # 最高価格シートを追加
+    ws_max = wb.create_sheet("最高価格")
+    
+    # 最高価格シートのヘッダー
+    max_headers = ['材料名', '最高価格', '企業名', '地域']
+    max_header_fill = PatternFill(start_color="C55A11", end_color="C55A11", fill_type="solid")
+    
+    for col_idx, header in enumerate(max_headers, 1):
+        cell = ws_max.cell(row=1, column=col_idx, value=header)
+        cell.fill = max_header_fill
+        cell.font = header_font
+    
+    # 最高価格データ
+    max_prices = calculate_max_prices()
+    for row_idx, max_price in enumerate(max_prices, 2):
+        ws_max.cell(row=row_idx, column=1, value=max_price['material'])
+        ws_max.cell(row=row_idx, column=2, value=max_price['max_price'])
+        ws_max.cell(row=row_idx, column=3, value=max_price['company'])
+        ws_max.cell(row=row_idx, column=4, value=max_price['region'])
     
     # メモリに保存
     output = io.BytesIO()
