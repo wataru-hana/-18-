@@ -22,6 +22,29 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# グローバルエラーハンドラー（すべてのエラーをJSONで返す）
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """すべての例外をJSONで返す"""
+    import traceback
+    return jsonify({
+        'status': 'error',
+        'error': str(e),
+        'type': type(e).__name__,
+        'trace': traceback.format_exc()
+    }), 500
+
+@app.errorhandler(500)
+def handle_500(e):
+    """500エラーをJSONで返す"""
+    import traceback
+    return jsonify({
+        'status': 'error',
+        'error': 'Internal Server Error',
+        'details': str(e),
+        'trace': traceback.format_exc()
+    }), 500
+
 # データベースモデル
 class Company(db.Model):
     """企業モデル"""
