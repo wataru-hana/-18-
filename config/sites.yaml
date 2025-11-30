@@ -249,3 +249,8 @@ sites:
   region: 岐阜
   extractor_type: auto
   price_url: https://oogakikinzoku.com/purchaceditem/
+- name: 高橋商事株式会社
+  category: 2
+  region: 山梨
+  extractor_type: auto
+  price_url: http://www.takahashisyouji.co.jp/index.html
