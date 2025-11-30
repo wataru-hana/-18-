@@ -1,0 +1,24 @@
+# 価格データを記入する表形式のシート設定
+# 複数のExcelファイル・シートに自動的に価格を記入できます
+
+output_tables:
+  # 例1: プライステスト.xlsxの「１１０２７」シート
+  - excel_file: "プライステスト.xlsx"
+    sheet_name: "１１０２７"  # 全角・半角の数字に対応
+    description: "プライステスト用の表"
+    enabled: true  # true/falseで有効/無効を切り替え
+  
+  # 例2: 既存の「正規の表」シート
+  - excel_file: "price_results_v2_20251104_220253.xlsx"
+    sheet_name: "正規の表"
+    description: "標準的な価格表"
+    enabled: true
+  
+  # 例3: 別のファイルの別のシート（コメントアウトで無効化）
+  # - excel_file: "別のファイル.xlsx"
+  #   sheet_name: "価格表"
+  #   description: "別の用途の表"
+  #   enabled: false
+
+
+

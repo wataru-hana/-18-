@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-実装済み18社のスクレイピングを実行し、「正規の表」シートに価格を記入するスクリプト
-実際にスクレイピングして取得した価格を記入します
+汎用的な表形式シートへの価格記入システム
+設定ファイル（config/output_tables.yaml）で指定した複数のExcelファイル・シートに
+自動的に価格を記入します
 """
 
 import yaml
@@ -46,7 +47,7 @@ IMPLEMENTED_COMPANIES = {
     '株式会社 ヒラノヤ',
 }
 
-# 材料名のマッピング（取得した材料名 → 正規の表の列名）
+# 材料名のマッピング（取得した材料名 → シートの列名）
 MATERIAL_MAPPING = {
     'ピカ銅': 'ピカ銅',
     'ピカ線': 'ピカ銅',
@@ -225,17 +226,15 @@ def load_site_config(config_path: str = 'config/sites.yaml'):
 def filter_implemented_companies(sites):
     """実装済み企業のみをフィルタリング"""
     filtered = []
-    seen_companies = set()  # 重複チェック用
+    seen_companies = set()
     
     for site in sites:
         company_name = site.get('name', '')
         normalized_name = normalize_company_name(company_name)
         
-        # 実装済みリストに含まれているか確認
         if normalized_name not in IMPLEMENTED_COMPANIES:
             continue
         
-        # 重複チェック（正規化後の名前で）
         if normalized_name in seen_companies:
             logger.warning(f"重複をスキップ: {company_name} (正規化後: {normalized_name})")
             continue
@@ -313,7 +312,6 @@ def scrape_implemented_companies():
     target_items_config = load_target_items_config()
     price_corrections = load_price_corrections()
     
-    # 実装済み企業のみをフィルタリング
     sites = filter_implemented_companies(site_configs)
     
     logger.info(f"実装済み企業: {len(sites)}社を対象にスクレイピングを開始します")
@@ -330,7 +328,6 @@ def scrape_implemented_companies():
         logger.info(f"\n[{i}/{len(sites)}] 処理中: {company_name} (正規化後: {normalized_name})")
         
         try:
-            # カテゴリに応じてスクレイパーを選択
             if category == 1:
                 scraper = Category1Scraper(site_config, delay=2.0)
             elif category == 2:
@@ -339,23 +336,19 @@ def scrape_implemented_companies():
                 logger.warning(f"  不明なカテゴリ: {category}")
                 continue
             
-            # スクレイピング実行
             result = scraper.scrape(
                 filter_target_items=True,
                 target_items_config=target_items_config
             )
             
-            # 企業名を正規化
             result['company_name'] = normalized_name
-            
             company_results.append(result)
             
-            # 進捗表示
             prices = result.get('prices', {})
             if prices:
                 price_count = len(prices)
                 logger.info(f"  ✓ {price_count} 件の価格情報を取得")
-                for material, price in list(prices.items())[:5]:  # 最初の5件を表示
+                for material, price in list(prices.items())[:5]:
                     logger.info(f"    - {material}: {price}")
             else:
                 error = result.get('error', '')
@@ -372,14 +365,13 @@ def scrape_implemented_companies():
                 'prices': {}
             })
     
-    # 価格修正マッピングを適用
     if price_corrections:
         logger.info("価格修正マッピングを適用中...")
         company_results = apply_price_corrections(company_results, price_corrections)
     
     return company_results
 
-def fill_standard_table(excel_file, company_results, target_sheet_name='正規の表'):
+def fill_table_format(excel_file, company_results, target_sheet_name):
     """
     表形式のシートにスクレイピング結果を記入（汎用版）
     
@@ -387,9 +379,6 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
         excel_file: Excelファイルのパス
         company_results: スクレイピング結果のリスト
         target_sheet_name: 対象シート名（全角・半角の数字に対応）
-    
-    Returns:
-        bool: 成功した場合True、失敗した場合False
     """
     try:
         wb = load_workbook(excel_file)
@@ -415,13 +404,13 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
         logger.info(f"利用可能なシート: {wb.sheetnames}")
         return False
     
-    ws_standard = wb[actual_sheet_name]
+    ws = wb[actual_sheet_name]
     logger.info(f"シート「{actual_sheet_name}」を読み込みました")
     
-    # ヘッダー行を取得
-    header_row = [ws_standard.cell(row=1, column=col) for col in range(1, ws_standard.max_column + 1)]
+    # ヘッダー行を取得（1行目、2列目以降）
     header_materials = {}
-    for col_idx, cell in enumerate(header_row, 1):
+    for col_idx in range(2, ws.max_column + 1):  # 2列目から（1列目は企業名）
+        cell = ws.cell(row=1, column=col_idx)
         if cell.value:
             header_materials[str(cell.value).strip()] = col_idx
     
@@ -429,16 +418,19 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
     
     # 既存の企業名のリストを作成（2行目以降）
     existing_companies = {}
-    for row_idx in range(2, ws_standard.max_row + 1):
-        company_name_cell = ws_standard.cell(row=row_idx, column=1)
+    for row_idx in range(2, ws.max_row + 1):
+        company_name_cell = ws.cell(row=row_idx, column=1)
         company_name = str(company_name_cell.value).strip() if company_name_cell.value else ''
         if company_name:
             normalized = normalize_company_name(company_name)
             existing_companies[normalized] = row_idx
     
+    logger.info(f"既存の企業: {len(existing_companies)}社")
+    
     # スクレイピングで取得した企業の価格を記入
-    next_row = ws_standard.max_row + 1
-    processed_companies = set()  # 重複チェック用
+    processed_companies = set()
+    filled_count = 0
+    next_row = ws.max_row + 1
     
     for result in company_results:
         company_name = result.get('company_name', '')
@@ -449,7 +441,6 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             logger.warning(f"  {company_name}: 価格データがありません")
             continue
         
-        # 重複チェック
         if normalized_name in processed_companies:
             logger.warning(f"重複をスキップ: {company_name} (正規化後: {normalized_name})")
             continue
@@ -463,13 +454,13 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             logger.info(f"  {company_name}: 既存の行{row_idx}に記入")
         else:
             # 新しい行に企業名を追加
-            ws_standard.cell(row=next_row, column=1, value=normalized_name)
+            ws.cell(row=next_row, column=1, value=normalized_name)
             row_idx = next_row
             existing_companies[normalized_name] = row_idx
             logger.info(f"  {company_name}: 新規追加 (行{next_row})")
             next_row += 1
         
-        # 各材料の価格を記入（既存の価格を上書き）
+        # 各材料の価格を記入
         for material_name, price_value in prices.items():
             # 材料名を正規化
             normalized_material = None
@@ -479,7 +470,6 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
                     break
             
             if not normalized_material:
-                # 直接マッチを試す
                 if material_name in header_materials:
                     normalized_material = material_name
                 else:
@@ -491,14 +481,13 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             if normalized_material in header_materials:
                 col_idx = header_materials[normalized_material]
             else:
-                # 全角スペースを半角スペースに変換して再試行
                 normalized_material_alt = normalized_material.replace('　', ' ')
                 if normalized_material_alt in header_materials:
                     col_idx = header_materials[normalized_material_alt]
                 else:
-                    # 逆も試す
                     for header_key in header_materials.keys():
-                        if normalized_material.replace(' ', '　') == header_key or normalized_material == header_key.replace(' ', '　'):
+                        if (normalized_material.replace(' ', '　') == header_key or 
+                            normalized_material == header_key.replace(' ', '　')):
                             col_idx = header_materials[header_key]
                             break
             
@@ -510,8 +499,9 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             normalized_price = normalize_price(price_value)
             
             if normalized_price:
-                ws_standard.cell(row=row_idx, column=col_idx, value=normalized_price)
-                logger.info(f"    {normalized_material}: {normalized_price}円 (列{col_idx})")
+                ws.cell(row=row_idx, column=col_idx, value=normalized_price)
+                filled_count += 1
+                logger.info(f"    {normalized_material}: {normalized_price}円 (行{row_idx}, 列{col_idx})")
     
     # 罫線を追加
     thin_border = Border(
@@ -522,10 +512,9 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
     )
     
     logger.info("\n罫線を追加中...")
-    # すべてのセルに罫線を追加
-    for row_idx in range(1, ws_standard.max_row + 1):
-        for col_idx in range(1, ws_standard.max_column + 1):
-            cell = ws_standard.cell(row=row_idx, column=col_idx)
+    for row_idx in range(1, ws.max_row + 1):
+        for col_idx in range(1, ws.max_column + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
             cell.border = thin_border
     
     # ファイルを保存
@@ -534,6 +523,7 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
         logger.info(f"\n✓ 「{actual_sheet_name}」シートにスクレイピング結果を記入しました")
         logger.info(f"  ファイル: {excel_file}")
         logger.info(f"  処理した企業数: {len(processed_companies)}社")
+        logger.info(f"  記入した価格数: {filled_count}件")
         return True
     except Exception as e:
         logger.error(f"エラー: ファイルの保存に失敗しました: {str(e)}")
@@ -547,6 +537,7 @@ def load_output_tables_config(config_path: str = 'config/output_tables.yaml'):
             return config.get('output_tables', [])
     except FileNotFoundError:
         logger.warning(f"出力先テーブル設定ファイルが見つかりません: {config_path}")
+        logger.info("デフォルト設定を使用します")
         return []
     except Exception as e:
         logger.error(f"出力先テーブル設定ファイルの読み込みエラー: {str(e)}")
@@ -554,7 +545,7 @@ def load_output_tables_config(config_path: str = 'config/output_tables.yaml'):
 
 if __name__ == '__main__':
     logger.info("="*80)
-    logger.info("実装済み18社のスクレイピングを開始します...")
+    logger.info("汎用的な表形式シートへの価格記入システムを開始します...")
     logger.info("="*80)
     
     # スクレイピングを実行
@@ -571,14 +562,16 @@ if __name__ == '__main__':
     logger.info(f"  取得価格情報総数: {total_prices} 件")
     logger.info(f"{'='*60}")
     
-    # 出力先テーブル設定を読み込む（新システム）
+    # 出力先テーブル設定を読み込む
     output_tables = load_output_tables_config()
     
-    if output_tables:
-        # 新システム: 設定ファイルで指定された複数のシートに記入
+    if not output_tables:
+        logger.warning("出力先テーブル設定がありません。config/output_tables.yaml を設定してください。")
+    else:
         logger.info(f"\n出力先テーブル設定: {len(output_tables)}件")
-        success_tables = 0
         
+        # 各出力先に記入
+        success_tables = 0
         for i, table_config in enumerate(output_tables, 1):
             excel_file = table_config.get('excel_file', '')
             sheet_name = table_config.get('sheet_name', '')
@@ -597,25 +590,15 @@ if __name__ == '__main__':
             if description:
                 logger.info(f"  説明: {description}")
             
-            if fill_standard_table(excel_file, company_results, sheet_name):
+            if fill_table_format(excel_file, company_results, sheet_name):
                 success_tables += 1
         
         logger.info(f"\n{'='*60}")
         logger.info(f"表形式シートへの記入完了:")
         logger.info(f"  成功: {success_tables}/{len([t for t in output_tables if t.get('enabled', True)])} シート")
         logger.info(f"{'='*60}")
-    else:
-        # 旧システム: デフォルトの「正規の表」シートに記入（後方互換性のため）
-        excel_file = 'price_results_v2_20251104_220253.xlsx'
-        logger.info("\n設定ファイルが見つからないため、デフォルトの「正規の表」シートに記入します")
-        fill_standard_table(excel_file, company_results, '正規の表')
     
     logger.info("\n完了しました！")
-
-
-
-
-
 
 
 
