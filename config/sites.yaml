@@ -232,3 +232,21 @@ sites:
   extractor_type: div_list
   extraction_type: item_box
   box_class: item-box
+# ========== 追加企業（2024年11月30日） ==========
+- name: 鴻陽産業株式会社 岐阜工場
+  category: 2
+  region: 岐阜
+  extractor_type: auto
+  price_url: https://www.soou-kinzoku.com/item/index/1
+  price_urls:
+  - https://www.soou-kinzoku.com/item/index/1   # 銅系（ピカ銅、上銅、込銅）
+  - https://www.soou-kinzoku.com/item/index/5   # 砲金・真鍮系
+  - https://www.soou-kinzoku.com/item/index/6   # アルミ系（サッシ、ホイール、缶）
+  - https://www.soou-kinzoku.com/item/index/7   # ステンレス系
+  - https://www.soou-kinzoku.com/item/index/2   # 電線系（80%、60%、VA線）
+  - https://www.soou-kinzoku.com/item/index/8   # 鉛・バッテリー系
+- name: 株式会社 大垣金属
+  category: 2
+  region: 岐阜
+  extractor_type: auto
+  price_url: https://oogakikinzoku.com/purchaceditem/
