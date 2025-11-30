@@ -468,23 +468,15 @@ def fill_table_formats_from_db(wb):
     """データベースから取得した価格データを表形式シートに記入"""
     def get_config_path(filename):
         """設定ファイルのパスを取得"""
+        # webapp_example内のconfigフォルダを確認
         local_path = os.path.join(os.path.dirname(__file__), 'config', filename)
         if os.path.exists(local_path):
             return local_path
+        # 親ディレクトリのconfigフォルダを確認
         parent_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', filename)
         if os.path.exists(parent_path):
             return parent_path
         return parent_path
-    
-    # 出力先テーブル設定を読み込む
-    try:
-        output_tables_path = get_config_path('output_tables.yaml')
-        with open(output_tables_path, 'r', encoding='utf-8') as f:
-            output_tables_config = yaml.safe_load(f)
-            output_tables = output_tables_config.get('output_tables', [])
-    except FileNotFoundError:
-        # 設定ファイルがない場合はスキップ
-        return
     
     # 最新の価格データを取得（企業ごと）
     companies = Company.query.filter_by(is_implemented=True).all()
@@ -506,6 +498,40 @@ def fill_table_formats_from_db(wb):
                 'prices': prices
             })
     
+    if not company_results:
+        # 価格データがない場合はスキップ
+        return
+    
+    # 出力先テーブル設定を読み込む
+    output_tables = []
+    try:
+        output_tables_path = get_config_path('output_tables.yaml')
+        if os.path.exists(output_tables_path):
+            with open(output_tables_path, 'r', encoding='utf-8') as f:
+                output_tables_config = yaml.safe_load(f)
+                output_tables = output_tables_config.get('output_tables', [])
+        
+        # 設定ファイルがない場合、または空の場合はデフォルト設定を使用
+        if not output_tables:
+            output_tables = [
+                {
+                    'excel_file': 'プライステスト.xlsx',
+                    'sheet_name': '１１０２７',
+                    'description': 'プライステスト用の表',
+                    'enabled': True
+                }
+            ]
+    except Exception as e:
+        # 設定ファイルの読み込みエラー時はデフォルト設定を使用
+        output_tables = [
+            {
+                'excel_file': 'プライステスト.xlsx',
+                'sheet_name': '１１０２７',
+                'description': 'プライステスト用の表',
+                'enabled': True
+            }
+        ]
+    
     # 各出力先テーブル設定に基づいてシートに記入
     for table_config in output_tables:
         if not table_config.get('enabled', True):
@@ -517,35 +543,84 @@ def fill_table_formats_from_db(wb):
         if not excel_file or not sheet_name:
             continue
         
-        # テンプレートファイルが存在する場合は読み込む
-        template_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), excel_file)
-        if os.path.exists(template_path):
-            try:
-                template_wb = load_workbook(template_path)
-                # 指定されたシートを現在のワークブックにコピー
-                if sheet_name in template_wb.sheetnames:
-                    template_ws = template_wb[sheet_name]
-                    # シートをコピー
-                    new_ws = wb.create_sheet(sheet_name)
-                    for row in template_ws.iter_rows():
-                        for cell in row:
-                            new_cell = new_ws.cell(row=cell.row, column=cell.column)
-                            new_cell.value = cell.value
-                            if cell.has_style:
-                                new_cell.font = cell.font
-                                new_cell.fill = cell.fill
-                                new_cell.border = cell.border
-                                new_cell.alignment = cell.alignment
+        try:
+            # テンプレートファイルのパスを複数箇所で確認
+            template_paths = [
+                os.path.join(os.path.dirname(__file__), excel_file),  # webapp_example内
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), excel_file),  # 親ディレクトリ
+            ]
+            
+            template_path = None
+            for path in template_paths:
+                if os.path.exists(path):
+                    template_path = path
+                    break
+            
+            if template_path:
+                # テンプレートファイルが存在する場合は読み込む
+                try:
+                    template_wb = load_workbook(template_path)
+                    # シート名を探す（全角・半角対応）
+                    actual_sheet_name = None
+                    for sname in template_wb.sheetnames:
+                        if (sheet_name == sname or 
+                            sheet_name in str(sname) or 
+                            str(sname) in sheet_name):
+                            actual_sheet_name = sname
+                            break
                     
-                    # 価格データを記入
+                    if actual_sheet_name:
+                        template_ws = template_wb[actual_sheet_name]
+                        # シートをコピー
+                        new_ws = wb.create_sheet(sheet_name)
+                        for row in template_ws.iter_rows():
+                            for cell in row:
+                                new_cell = new_ws.cell(row=cell.row, column=cell.column)
+                                new_cell.value = cell.value
+                                if cell.has_style:
+                                    new_cell.font = cell.font
+                                    new_cell.fill = cell.fill
+                                    new_cell.border = cell.border
+                                    new_cell.alignment = cell.alignment
+                        
+                        # 価格データを記入
+                        fill_table_sheet(new_ws, company_results)
+                    else:
+                        # シートが見つからない場合は新しいシートを作成
+                        new_ws = wb.create_sheet(sheet_name)
+                        fill_table_sheet(new_ws, company_results)
+                except Exception as e:
+                    # テンプレートファイルの読み込みに失敗した場合は新しいシートを作成
+                    new_ws = wb.create_sheet(sheet_name)
                     fill_table_sheet(new_ws, company_results)
-            except Exception as e:
-                # テンプレートファイルの読み込みに失敗した場合はスキップ
-                continue
-        else:
-            # テンプレートファイルがない場合は新しいシートを作成
-            new_ws = wb.create_sheet(sheet_name)
-            fill_table_sheet(new_ws, company_results)
+            else:
+                # テンプレートファイルがない場合は新しいシートを作成（デフォルト構造）
+                new_ws = wb.create_sheet(sheet_name)
+                # デフォルトのヘッダー行を作成（プライステスト.xlsxの「１１０２７」シートと同じ構造）
+                # 1列目は企業名列（空）、2列目以降が材料名
+                headers = ['', 'ピカ銅', '並銅', '砲金', '真鍮', '雑線80%', '雑線60%-65%', 
+                          'VA線', 'アルミホイール', 'アルミサッシ', 'アルミ缶　バラ', 
+                          'アルミ缶　プレス', 'ステンレス304', '鉛バッテリー']
+                for col_idx, header in enumerate(headers, 1):
+                    cell = new_ws.cell(row=1, column=col_idx, value=header)
+                    # ヘッダーのスタイルを設定
+                    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+                    if col_idx > 1:  # 2列目以降のみスタイルを設定
+                        cell.font = Font(bold=True, size=11)
+                        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                    cell.border = Border(
+                        left=Side(style='thin'),
+                        right=Side(style='thin'),
+                        top=Side(style='thin'),
+                        bottom=Side(style='thin')
+                    )
+                
+                # 価格データを記入
+                fill_table_sheet(new_ws, company_results)
+        except Exception as e:
+            # エラーが発生した場合はスキップ（ログに出力する場合はここでログ出力）
+            continue
 
 def fill_table_sheet(ws, company_results):
     """表形式のシートに価格データを記入"""
