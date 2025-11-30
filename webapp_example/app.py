@@ -345,30 +345,15 @@ def download_excel():
     import io
     
     wb = Workbook()
-    ws = wb.active
-    ws.title = "価格情報"
     
-    # ヘッダー
-    headers = ['会社名', '地域', '材料名', '価格', '取得日時']
-    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-    header_font = Font(bold=True, color="FFFFFF", size=11)
-    
-    for col_idx, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col_idx, value=header)
-        cell.fill = header_fill
-        cell.font = header_font
-    
-    # データ
-    results = PriceData.query.order_by(PriceData.scraped_at.desc()).limit(1000).all()
-    for row_idx, price_data in enumerate(results, 2):
-        ws.cell(row=row_idx, column=1, value=price_data.company.name)
-        ws.cell(row=row_idx, column=2, value=price_data.company.region)
-        ws.cell(row=row_idx, column=3, value=price_data.material_name)
-        ws.cell(row=row_idx, column=4, value=price_data.price)
-        ws.cell(row=row_idx, column=5, value=price_data.scraped_at.isoformat() if price_data.scraped_at else '')
+    # 最初に表形式シートを作成（これがメインのシート）
+    ws_table = wb.active
+    ws_table.title = "価格一覧表"
+    create_price_table_sheet(ws_table)
     
     # 最高価格シートを追加
     ws_max = wb.create_sheet("最高価格")
+    header_font = Font(bold=True, color="FFFFFF", size=11)
     
     # 最高価格シートのヘッダー
     max_headers = ['材料名', '最高価格', '企業名', '地域']
@@ -387,8 +372,24 @@ def download_excel():
         ws_max.cell(row=row_idx, column=3, value=max_price['company'])
         ws_max.cell(row=row_idx, column=4, value=max_price['region'])
     
-    # 表形式シートへの記入（設定ファイルで指定されたシート）
-    fill_table_formats_from_db(wb)
+    # 詳細データシートを追加（旧形式）
+    ws_detail = wb.create_sheet("価格詳細")
+    headers = ['会社名', '地域', '材料名', '価格', '取得日時']
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws_detail.cell(row=1, column=col_idx, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+    
+    # データ
+    results = PriceData.query.order_by(PriceData.scraped_at.desc()).limit(1000).all()
+    for row_idx, price_data in enumerate(results, 2):
+        ws_detail.cell(row=row_idx, column=1, value=price_data.company.name)
+        ws_detail.cell(row=row_idx, column=2, value=price_data.company.region)
+        ws_detail.cell(row=row_idx, column=3, value=price_data.material_name)
+        ws_detail.cell(row=row_idx, column=4, value=price_data.price)
+        ws_detail.cell(row=row_idx, column=5, value=price_data.scraped_at.isoformat() if price_data.scraped_at else '')
     
     # メモリに保存
     output = io.BytesIO()
@@ -401,6 +402,172 @@ def download_excel():
         as_attachment=True,
         download_name=f'price_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     )
+
+def create_price_table_sheet(ws):
+    """添付画像の形式で価格一覧表を作成（会社名が縦、品目が横）"""
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    
+    # 18社のリスト（添付画像の順番）
+    COMPANY_LIST = [
+        '眞田鋼業株式会社',
+        '有限会社金田商事',
+        '木村金属（大阪）',
+        '明鑫貿易株式会社',
+        '東起産業（株）',
+        '土金（大阪）',
+        '大畑商事（千葉・大阪）',
+        '千福商会（大阪）',
+        '鴻祥貿易株式会社',
+        '株式会社鳳山',
+        '株式会社 春日商会　富山支店',
+        '株式会社 春日商会　滋賀支店',
+        '株式会社 春日商会　一宮本社',
+        '安城貿易（愛知）',
+        '東北キング',
+        '株式会社八木',
+        '有限会社　八尾アルミセンター',
+        '株式会社 ヒラノヤ'
+    ]
+    
+    # 品目リスト（添付画像の順番）
+    MATERIAL_LIST = [
+        'ピカ銅',
+        '並銅',
+        '砲金',
+        '真鍮',
+        '雑線80%',
+        '雑線60%-65%',
+        'VA線',
+        'アルミホイール',
+        'アルミサッシ',
+        'アルミ缶　バラ',
+        'アルミ缶　プレス',
+        'ステンレス304',
+        '鉛バッテリー'
+    ]
+    
+    # 材料名のマッピング（スクレイピング結果と表ヘッダーを一致させる）
+    MATERIAL_MAPPING = {
+        'ピカ銅': 'ピカ銅', 'ピカ線': 'ピカ銅', 'ピカドウ': 'ピカ銅',
+        '1号銅': 'ピカ銅', '一号銅': 'ピカ銅', '特一号銅': 'ピカ銅',
+        '並銅': '並銅', '波銅': '並銅', '波道': '並銅', '2号銅': '並銅',
+        '砲金': '砲金', 'ほうきん': '砲金', 'gunmetal': '砲金',
+        '真鍮': '真鍮', 'しんちゅう': '真鍮', '黄銅': '真鍮',
+        '雑線80%': '雑線80%', '雑電線80%': '雑線80%', '電線80%': '雑線80%', '雑線（80%）': '雑線80%',
+        '雑線60%': '雑線60%-65%', '雑線65%': '雑線60%-65%', '雑線60%-65%': '雑線60%-65%',
+        '雑電線60%': '雑線60%-65%', '電線60%': '雑線60%-65%', '雑線（60%）': '雑線60%-65%',
+        'VA線': 'VA線', 'VVF': 'VA線', 'VVFケーブル': 'VA線', 'ＶＡ線': 'VA線',
+        'アルミホイール': 'アルミホイール', 'ホイール': 'アルミホイール', 'Alホイール': 'アルミホイール',
+        'アルミサッシ': 'アルミサッシ', 'サッシ': 'アルミサッシ', 'Alサッシ': 'アルミサッシ',
+        'アルミ缶バラ': 'アルミ缶　バラ', '缶バラ': 'アルミ缶　バラ', 'アルミ缶　バラ': 'アルミ缶　バラ',
+        'アルミ缶プレス': 'アルミ缶　プレス', '缶プレス': 'アルミ缶　プレス', 'アルミ缶　プレス': 'アルミ缶　プレス',
+        'SUS304': 'ステンレス304', 'ステンレス304': 'ステンレス304', '304': 'ステンレス304',
+        'ステン304': 'ステンレス304', 'SUS': 'ステンレス304',
+        '鉛バッテリー': '鉛バッテリー', 'バッテリー': '鉛バッテリー', '鉛': '鉛バッテリー',
+    }
+    
+    # スタイル設定
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=10)
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    center_align = Alignment(horizontal='center', vertical='center')
+    
+    # ヘッダー行（1行目）：1列目は空（会社名列）、2列目以降が品目名
+    ws.cell(row=1, column=1, value='').border = thin_border
+    for col_idx, material in enumerate(MATERIAL_LIST, 2):
+        cell = ws.cell(row=1, column=col_idx, value=material)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = center_align
+        cell.border = thin_border
+    
+    # 会社名列（1列目、2行目以降）
+    for row_idx, company in enumerate(COMPANY_LIST, 2):
+        cell = ws.cell(row=row_idx, column=1, value=company)
+        cell.border = thin_border
+        cell.alignment = Alignment(vertical='center')
+        # 品目列に罫線を追加（空セル）
+        for col_idx in range(2, len(MATERIAL_LIST) + 2):
+            ws.cell(row=row_idx, column=col_idx).border = thin_border
+    
+    # データベースから最新の価格データを取得
+    companies = Company.query.filter_by(is_implemented=True).all()
+    
+    for company in companies:
+        # 最新のスクレイピング時刻を取得
+        latest_scrape_time = db.session.query(db.func.max(PriceData.scraped_at))\
+            .filter_by(company_id=company.id).scalar()
+        
+        if not latest_scrape_time:
+            continue
+        
+        # 最新の価格データを取得
+        prices_data = PriceData.query.filter_by(
+            company_id=company.id,
+            scraped_at=latest_scrape_time
+        ).all()
+        
+        # 企業名を正規化して行番号を特定
+        company_name_normalized = normalize_company_name(company.name)
+        
+        # 表内での行番号を探す
+        row_idx = None
+        for idx, table_company in enumerate(COMPANY_LIST, 2):
+            table_company_normalized = normalize_company_name(table_company)
+            if (company_name_normalized == table_company_normalized or
+                company_name_normalized in table_company_normalized or
+                table_company_normalized in company_name_normalized):
+                row_idx = idx
+                break
+        
+        if row_idx is None:
+            continue
+        
+        # 価格を対応するセルに記入
+        for price_data in prices_data:
+            material_name = price_data.material_name
+            
+            # 材料名を正規化
+            normalized_material = None
+            for key, value in MATERIAL_MAPPING.items():
+                if key in material_name or material_name in key:
+                    normalized_material = value
+                    break
+            
+            if not normalized_material:
+                continue
+            
+            # 列番号を特定
+            col_idx = None
+            for idx, table_material in enumerate(MATERIAL_LIST, 2):
+                if normalized_material == table_material:
+                    col_idx = idx
+                    break
+            
+            if col_idx is None:
+                continue
+            
+            # 価格を数値として記入
+            price_value = normalize_price(price_data.price)
+            if price_value:
+                try:
+                    cell = ws.cell(row=row_idx, column=col_idx, value=int(price_value))
+                    cell.alignment = center_align
+                    cell.border = thin_border
+                except ValueError:
+                    cell = ws.cell(row=row_idx, column=col_idx, value=price_value)
+                    cell.alignment = center_align
+                    cell.border = thin_border
+    
+    # 列幅を調整
+    ws.column_dimensions['A'].width = 28  # 会社名列
+    for col_idx in range(2, len(MATERIAL_LIST) + 2):
+        ws.column_dimensions[chr(64 + col_idx) if col_idx <= 26 else 'A' + chr(64 + col_idx - 26)].width = 12
 
 def normalize_company_name(name):
     """企業名を正規化（scrape_18_companies_to_excel.pyと同じロジック）"""
