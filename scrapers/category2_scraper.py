@@ -45,6 +45,8 @@ class Category2Scraper(BaseScraper):
             prices = self.extract_from_haruhi_table(soup)
         elif extractor_type == 'touhoku_div':
             prices = self.extract_from_touhoku_div(soup)
+        elif extractor_type == 'takahashi_kaitori':
+            prices = self.extract_from_takahashi_kaitori(soup)
         else:
             # デフォルトは自動抽出
             prices = self.extract_auto(soup)
@@ -620,5 +622,90 @@ class Category2Scraper(BaseScraper):
                             material = material.strip()
                             if material:
                                 prices[material] = price
+        
+        return prices
+    
+    def extract_from_takahashi_kaitori(self, soup: BeautifulSoup) -> Dict[str, str]:
+        """
+        高橋商事株式会社用の抽出ロジック
+        トップページのiframeから価格ページのURLを取得し、そこから価格を抽出
+        
+        HTML構造:
+        <div class="kaitori_box">
+            <div class="kaitori_item">ピカ銅</div>
+            <div class="rightbox">
+                <span class="henko_ari">1,750円</span>／kg
+            </div>
+        </div>
+        """
+        import requests
+        
+        prices = {}
+        
+        try:
+            # iframeのsrc属性から価格ページのURLを取得
+            iframe = soup.find('iframe', class_='kaitori_if')
+            if iframe and iframe.get('src'):
+                iframe_src = iframe.get('src')
+                # 相対URLを絶対URLに変換
+                base_url = self.site_config.get('price_url', '')
+                if base_url:
+                    # base_urlから親ディレクトリを取得
+                    base_dir = base_url.rsplit('/', 1)[0]
+                    price_page_url = f"{base_dir}/{iframe_src}"
+                else:
+                    price_page_url = f"http://www.takahashisyouji.co.jp/{iframe_src}"
+                
+                # 価格ページを取得
+                response = requests.get(price_page_url, timeout=30)
+                response.encoding = 'utf-8'
+                price_soup = BeautifulSoup(response.text, 'lxml')
+                
+                # 価格を抽出
+                prices = self._extract_takahashi_prices(price_soup)
+            else:
+                # iframeが見つからない場合、直接抽出を試みる
+                prices = self._extract_takahashi_prices(soup)
+        
+        except Exception as e:
+            # エラーが発生した場合、直接抽出を試みる
+            prices = self._extract_takahashi_prices(soup)
+        
+        return prices
+    
+    def _extract_takahashi_prices(self, soup: BeautifulSoup) -> Dict[str, str]:
+        """高橋商事の価格ページから価格を抽出"""
+        prices = {}
+        
+        # kaitori_boxから抽出
+        kaitori_boxes = soup.find_all('div', class_='kaitori_box')
+        
+        for box in kaitori_boxes:
+            # 材料名を取得
+            item_div = box.find('div', class_='kaitori_item')
+            if not item_div:
+                continue
+            
+            material_name = item_div.get_text(strip=True)
+            
+            # 価格を取得
+            rightbox = box.find('div', class_='rightbox')
+            if rightbox:
+                # span要素から価格を取得
+                price_span = rightbox.find('span', class_=['henko_ari', 'henko_nashi'])
+                if price_span:
+                    price_text = price_span.get_text(strip=True)
+                    # 「要相談」などの非数値価格はスキップ
+                    if '円' in price_text:
+                        # 単位を取得
+                        full_text = rightbox.get_text(strip=True)
+                        if '/kg' in full_text or '／kg' in full_text:
+                            prices[material_name] = price_text + '/kg'
+                        elif '/台' in full_text or '／台' in full_text:
+                            prices[material_name] = price_text + '/台'
+                        elif '/個' in full_text or '／個' in full_text:
+                            prices[material_name] = price_text + '/個'
+                        else:
+                            prices[material_name] = price_text
         
         return prices

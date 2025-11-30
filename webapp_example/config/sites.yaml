@@ -252,5 +252,5 @@ sites:
 - name: 高橋商事株式会社
   category: 2
   region: 山梨
-  extractor_type: auto
+  extractor_type: takahashi_kaitori
   price_url: http://www.takahashisyouji.co.jp/index.html
