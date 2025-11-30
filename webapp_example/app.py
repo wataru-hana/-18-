@@ -435,72 +435,65 @@ def download_excel():
         for col_idx in range(2, len(MATERIAL_LIST) + 2):
             ws_table.cell(row=row_idx, column=col_idx).border = thin_border
     
-    # データベースから最新の価格データを取得して記入
-    companies = Company.query.filter_by(is_implemented=True).all()
+    # データベースから全ての価格データを取得（材料名・企業名のペアごとに最新のものを使用）
+    all_prices = PriceData.query.order_by(PriceData.scraped_at.desc()).all()
     
-    for company in companies:
-        # 最新のスクレイピング時刻を取得
-        latest_scrape_time = db.session.query(db.func.max(PriceData.scraped_at))\
-            .filter_by(company_id=company.id).scalar()
-        
-        if not latest_scrape_time:
+    # 企業名→材料名→価格のディクショナリを作成（最新のもののみ保持）
+    price_dict = {}  # {normalized_company_name: {normalized_material: price}}
+    
+    for price_data in all_prices:
+        company = price_data.company
+        if not company:
             continue
         
-        # 最新の価格データを取得
-        prices_data = PriceData.query.filter_by(
-            company_id=company.id,
-            scraped_at=latest_scrape_time
-        ).all()
-        
-        # 企業名を正規化して行番号を特定
         company_name_normalized = normalize_company_name(company.name)
+        material_name = price_data.material_name
         
-        # 表内での行番号を探す
-        row_idx = None
-        for idx, table_company in enumerate(COMPANY_LIST, 2):
-            table_company_normalized = normalize_company_name(table_company)
-            if (company_name_normalized == table_company_normalized or
-                company_name_normalized in table_company_normalized or
-                table_company_normalized in company_name_normalized):
-                row_idx = idx
+        # 材料名を正規化
+        normalized_material = None
+        for key, value in MATERIAL_MAPPING.items():
+            if key in material_name or material_name in key:
+                normalized_material = value
                 break
         
-        if row_idx is None:
+        if not normalized_material:
             continue
         
-        # 価格を対応するセルに記入
-        for price_data in prices_data:
-            material_name = price_data.material_name
-            
-            # 材料名を正規化
-            normalized_material = None
-            for key, value in MATERIAL_MAPPING.items():
-                if key in material_name or material_name in key:
-                    normalized_material = value
-                    break
-            
-            if not normalized_material:
-                continue
-            
-            # 列番号を特定
-            col_idx = None
-            for idx, table_material in enumerate(MATERIAL_LIST, 2):
-                if normalized_material == table_material:
-                    col_idx = idx
-                    break
-            
-            if col_idx is None:
-                continue
-            
-            # 価格を数値として記入
+        # まだこの組み合わせの価格がなければ追加（降順なので最初が最新）
+        if company_name_normalized not in price_dict:
+            price_dict[company_name_normalized] = {}
+        
+        if normalized_material not in price_dict[company_name_normalized]:
             price_value = normalize_price(price_data.price)
             if price_value:
+                price_dict[company_name_normalized][normalized_material] = price_value
+    
+    # 表に価格を記入
+    for row_idx, table_company in enumerate(COMPANY_LIST, 2):
+        table_company_normalized = normalize_company_name(table_company)
+        
+        # price_dictから該当する企業を探す
+        matched_company = None
+        for dict_company in price_dict.keys():
+            if (table_company_normalized == dict_company or
+                table_company_normalized in dict_company or
+                dict_company in table_company_normalized):
+                matched_company = dict_company
+                break
+        
+        if matched_company is None:
+            continue
+        
+        # 各材料の価格を記入
+        for col_idx, table_material in enumerate(MATERIAL_LIST, 2):
+            if table_material in price_dict[matched_company]:
+                price_value = price_dict[matched_company][table_material]
                 try:
                     cell = ws_table.cell(row=row_idx, column=col_idx, value=int(price_value))
                     cell.alignment = center_align
                     cell.border = thin_border
-                except ValueError:
-                    cell = ws_table.cell(row=row_idx, column=col_idx, value=price_value)
+                except (ValueError, TypeError):
+                    cell = ws_table.cell(row=row_idx, column=col_idx, value=str(price_value))
                     cell.alignment = center_align
                     cell.border = thin_border
     
@@ -509,6 +502,39 @@ def download_excel():
     for col_idx in range(2, len(MATERIAL_LIST) + 2):
         col_letter = chr(64 + col_idx) if col_idx <= 26 else 'A' + chr(64 + col_idx - 26)
         ws_table.column_dimensions[col_letter].width = 12
+    
+    # デバッグ用シート：データベースに保存されている全価格データを表示
+    ws_debug = wb.create_sheet("デバッグ情報")
+    debug_headers = ['企業名', '材料名', '価格', '取得日時', '正規化企業名', '正規化材料名']
+    for col_idx, header in enumerate(debug_headers, 1):
+        ws_debug.cell(row=1, column=col_idx, value=header)
+    
+    debug_row = 2
+    for price_data in all_prices[:500]:  # 最大500件
+        company = price_data.company
+        if company:
+            company_name = company.name
+            company_normalized = normalize_company_name(company.name)
+        else:
+            company_name = "不明"
+            company_normalized = "不明"
+        
+        material_name = price_data.material_name
+        
+        # 材料名を正規化
+        normalized_material = "マッピングなし"
+        for key, value in MATERIAL_MAPPING.items():
+            if key in material_name or material_name in key:
+                normalized_material = value
+                break
+        
+        ws_debug.cell(row=debug_row, column=1, value=company_name)
+        ws_debug.cell(row=debug_row, column=2, value=material_name)
+        ws_debug.cell(row=debug_row, column=3, value=price_data.price)
+        ws_debug.cell(row=debug_row, column=4, value=str(price_data.scraped_at) if price_data.scraped_at else '')
+        ws_debug.cell(row=debug_row, column=5, value=company_normalized)
+        ws_debug.cell(row=debug_row, column=6, value=normalized_material)
+        debug_row += 1
     
     # メモリに保存
     output = io.BytesIO()
