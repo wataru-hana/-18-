@@ -489,3 +489,14 @@ corrections:
       price: '296'
     - material: ステンレス304
       price: '176'
+  鴻陽産業株式会社 岐阜工場:
+    add:
+    - material: 雑線80%
+      price: 1400円/kg
+    - material: 雑線60%-65%
+      price: 1180円/kg
+    modify:
+    - material: 雑線80%
+      price: '1400'
+    - material: 雑線60%-65%
+      price: '1180'
