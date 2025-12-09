@@ -250,6 +250,20 @@ def start_scraping():
         'max_prices': max_prices
     })
 
+@app.route('/api/reset-database', methods=['POST'])
+def reset_database():
+    """データベースをリセット（全データ削除）"""
+    try:
+        # 全ての価格データを削除
+        PriceData.query.delete()
+        # 全ての会社データを削除
+        Company.query.delete()
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Database reset complete'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
 @app.route('/api/results')
 def get_results():
     """最新の結果を取得"""
