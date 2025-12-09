@@ -47,6 +47,8 @@ class Category2Scraper(BaseScraper):
             prices = self.extract_from_touhoku_div(soup)
         elif extractor_type == 'takahashi_kaitori':
             prices = self.extract_from_takahashi_kaitori(soup)
+        elif extractor_type == 'dokin_div':
+            prices = self.extract_from_dokin_div(soup)
         else:
             # デフォルトは自動抽出
             prices = self.extract_auto(soup)
@@ -670,6 +672,46 @@ class Category2Scraper(BaseScraper):
         except Exception as e:
             # エラーが発生した場合、直接抽出を試みる
             prices = self._extract_takahashi_prices(soup)
+        
+        return prices
+    
+    def extract_from_dokin_div(self, soup: BeautifulSoup) -> Dict[str, str]:
+        """
+        土金（大阪）用の抽出ロジック
+        div要素内に「材料名+価格円」の形式でテキストが含まれる構造
+        例: <div>上銅1850円</div>
+        """
+        prices = {}
+        
+        # div要素を探す
+        for div in soup.find_all('div'):
+            text = div.get_text(strip=True)
+            
+            # 短いテキストで、円を含むもの（材料名+価格のパターン）
+            if '円' in text and len(text) < 50:
+                # 「材料名+数字+円」のパターンを抽出
+                # 例: 上銅1850円, 並銅1780円, VA線(巻き)780円
+                match = re.match(r'^([^\d]+?)(\d+(?:\.\d+)?(?:～\d+(?:\.\d+)?)?)円$', text)
+                if match:
+                    material = match.group(1).strip()
+                    price_text = match.group(2)
+                    
+                    # 範囲価格の場合（例: 890～1080）は最高価格を使用
+                    if '～' in price_text:
+                        price_parts = price_text.split('～')
+                        try:
+                            max_price = max([float(p) for p in price_parts])
+                            price = f"{int(max_price)}円"
+                        except ValueError:
+                            price = f"{price_text}円"
+                    else:
+                        price = f"{price_text}円"
+                    
+                    # 材料名が有効な場合のみ追加
+                    if material and len(material) > 0 and len(material) < 30:
+                        # 重複を避けるため、既に存在しない場合のみ追加
+                        if material not in prices:
+                            prices[material] = price
         
         return prices
     

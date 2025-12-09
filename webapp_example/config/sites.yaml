@@ -1,36 +1,35 @@
 sites:
-- name: 眞田鋼業株式会社
-  category: 2
-  region: 大阪
+- category: 2
+  extractor_type: auto
+  name: 眞田鋼業株式会社
   price_url: https://www.sanadakogyo.com/scrap_metal.html
-  extractor_type: auto
-- name: 有限会社金田商事
-  category: 2
-  region: 兵庫
-  extractor_type: kaneda_figcaption
-  price_url: https://www.kaneda-shouji.co.jp/product#a12
-- name: 木村��属（大阪�
-  category: 2
   region: 大阪
+- category: 2
+  extractor_type: kaneda_figcaption
+  name: 有限会社金田商事
+  price_url: https://www.kaneda-shouji.co.jp/product#a12
+  region: 兵庫
+- category: 2
   extractor_type: auto
+  name: 木村��属（大阪�
   price_url: https://kimura-metal.co.jp/price.html#07-01
-- name: 明鑫貿易�式会社
-  category: 2
-  region: 愛知
+  region: 大阪
+- category: 2
   extractor_type: auto
+  name: 明鑫貿易�式会社
   price_url: https://www.meikinboueki.com/
-- name: 北陸啼��式会社
-  category: 2
-  region: 福�
+  region: 愛知
+- category: 2
   extractor_type: auto
+  name: 北陸啼��式会社
   price_url: https://www.hokurikushokai.jp/kaitoriList.php?catid=2
   price_urls:
   - https://www.hokurikushokai.jp/kaitoriList.php?catid=2
   - https://www.hokurikushokai.jp/kaitoriList.php?catid=10
-- name: 内田産業株式会社
-  category: 2
-  region: 兵庫
+  region: 福�
+- category: 2
   extractor_type: auto
+  name: 内田産業株式会社
   price_url: https://uchidametal.com/kakaku/dou/
   price_urls:
   - https://uchidametal.com/kakaku/dou/
@@ -39,30 +38,30 @@ sites:
   - https://uchidametal.com/kakaku/shinchu/
   - https://uchidametal.com/kakaku/sus/
   - https://uchidametal.com/kakaku/bt/
-- name: 東鑫貿易�式会社
-  category: 2
-  region: 鳥�
+  region: 兵庫
+- category: 2
   extractor_type: auto
+  name: 東鑫貿易�式会社
   price_url: https://www.toshintrade.com/%E5%85%A8%E5%95%86%E5%93%81%E4%BE%A1%E6%A0%BC%E8%A1%A8
-- name: 東起産業��檼
-  category: 2
-  region: 香�
+  region: 鳥�
+- category: 2
   extractor_type: touki_dl
+  name: 東起産業��檼
   price_url: https://touki-sangyou.co.jp/
-- name: 土�߼�大阪�
-  category: 2
-  region: 大阪
-  extractor_type: auto
+  region: 香�
+- category: 2
+  extractor_type: dokin_div
+  name: 土�߼�大阪�
   price_url: https://www.dokindokin.com/scrap/
-- name: 大畑商事（千葉�大阪�
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 大畑商事（千葉�大阪�
   price_url: https://www.ohata.org/kakaku.html
-- name: 大啺
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 大啺
   price_url: https://daishouten.jp/product/product_taxo/copper/
   price_urls:
   - https://daishouten.jp/product/product_taxo/copper/
@@ -70,93 +69,93 @@ sites:
   - https://daishouten.jp/product/product_taxo/brass/
   - https://daishouten.jp/product/product_taxo/electric_wire/
   - https://daishouten.jp/product/product_taxo/stainless/
-- name: 卦�商会（大阪�
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 卦�商会（大阪�
   price_url: https://www.senfuku.net/scrap
-- name: 三禾貿�
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 三禾貿�
   price_url: http://www.mikaplastic.jp/list/?ca=2
-- name: 鴻祥貿易�式会社
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: kousyo_box
+  name: 鴻祥貿易�式会社
   price_url: https://kousyo-boueki.jp/scrap_nonferrous.html
-- name: 庚�啺��式会社
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 庚�啺��式会社
   price_url: https://www.hirotakashoji.com/list#shidhc8s25df1y2k7yf9
-- name: 株式会社鳳山
-  category: 2
-  region: 兵庫
-  price_url: https://houyama.com/price.html
-  extractor_type: houyama_dl
-- name: 株式会社栗田啼
-  category: 2
   region: 大阪
+- category: 2
+  extractor_type: houyama_dl
+  name: 株式会社鳳山
+  price_url: https://houyama.com/price.html
+  region: 兵庫
+- category: 2
   extractor_type: auto
+  name: 株式会社栗田啼
   price_url: https://kuritasyokai.com/
-- name: 株式会社 春日啼 富山支�
-  category: 2
-  region: 富山
+  region: 大阪
+- category: 2
   extractor_type: auto
+  name: 株式会社 春日啼 富山支�
   price_url: https://haruhi-shokai.com/scrap_nonferrous2.html
-- name: 株式会社 春日啼 滋�支�
-  category: 2
-  region: 滋�
+  region: 富山
+- category: 2
   extractor_type: auto
+  name: 株式会社 春日啼 滋�支�
   price_url: https://haruhi-shokai.com/scrap_nonferrous3.html
-- name: 株式会社 春日啼 �宮本社
-  category: 2
-  region: 愛知
+  region: 滋�
+- category: 2
   extractor_type: haruhi_table
+  name: 株式会社 春日啼 �宮本社
   price_url: https://haruhi-shokai.com/scrap_nonferrous1.html
-- name: 安城貿易（�知�
-  category: 2
   region: 愛知
+- category: 2
   extractor_type: auto
+  name: 安城貿易（�知�
   price_url: https://www.anjyo-t.com/scrap_metal.html
-- name: 山下商�
-  category: 2
   region: 愛知
+- category: 2
   extractor_type: auto
+  name: 山下商�
   price_url: https://tetushigenkan.com/blog/?page_id=38280
   price_urls:
   - https://tetushigenkan.com/blog/?page_id=38280
   - https://tetushigenkan.com/blog/?page_id=2340
   - https://tetushigenkan.com/blog/?page_id=22160
   - https://tetushigenkan.com/blog/?page_id=38278
-- name: 日中金属貿�
-  category: 2
-  region: 和歌山
+  region: 愛知
+- category: 2
   extractor_type: auto
+  name: 日中金属貿�
   price_url: https://nittyuu.co.jp/
-- name: 東北キング
-  category: 2
-  region: 大阪
+  region: 和歌山
+- category: 2
+  extractor_type: touhoku_div
+  name: 東北キング
   price_url: https://touhokuking.com/scrap_copper.html
   price_urls:
   - https://touhokuking.com/scrap_copper.html
   - https://touhokuking.com/scrap_nonferrous.html
-  extractor_type: touhoku_div
-- name: 高橋��属貿�
-  category: 2
   region: 大阪
+- category: 2
   extractor_type: auto
+  name: 高橋��属貿�
   price_url: http://takahashi-metal.com/
-- name: スクラ�価格ドットコ�
-  category: 2
-  region: 兵庫
+  region: 大阪
+- category: 2
   extractor_type: auto
+  name: スクラ�価格ドットコ�
   price_url: https://www.super-recycle.com/price_list/
-- name: シマ��� 株式会社
-  category: 2
-  region: 愛知
+  region: 兵庫
+- category: 2
   extractor_type: auto
+  name: シマ��� 株式会社
   price_url: https://www.shimakinzoku.com/items.html
   price_urls:
   - https://www.shimakinzoku.com/items.html
@@ -165,10 +164,10 @@ sites:
   - https://www.shimakinzoku.com/items/index/4
   - https://www.shimakinzoku.com/items/index/5
   - https://www.shimakinzoku.com/items/index/6
-- name: 佐��重��金属�式会社
-  category: 2
-  region: 滋�
+  region: 愛知
+- category: 2
   extractor_type: auto
+  name: 佐��重��金属�式会社
   price_url: https://aipo.xsrv.jp/sanometaru/%e8%b2%b7%e5%8f%96%e5%8d%98%e4%be%a1%e4%b8%80%e8%a6%a7/%e9%8a%85%e5%8d%98%e4%be%a1/
   price_urls:
   - https://aipo.xsrv.jp/sanometaru/%e8%b2%b7%e5%8f%96%e5%8d%98%e4%be%a1%e4%b8%80%e8%a6%a7/%e9%8a%85%e5%8d%98%e4%be%a1/
@@ -176,25 +175,25 @@ sites:
   - https://aipo.xsrv.jp/sanometaru/%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1%E4%B8%80%E8%A6%A7/%E3%82%A2%E3%83%AB%E3%83%9F%E7%B3%BB%E3%81%AE%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1/
   - https://aipo.xsrv.jp/sanometaru/%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1%E4%B8%80%E8%A6%A7/%E3%82%B9%E3%83%86%E3%83%B3%E3%83%AC%E3%82%B9%E7%B3%BB%E3%81%AE%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1/
   - https://aipo.xsrv.jp/sanometaru/%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1%E4%B8%80%E8%A6%A7/%E9%89%9B%E7%B3%BB%E3%81%AE%E8%B2%B7%E5%8F%96%E5%8D%98%E4%BE%A1/
-- name: 株式会社八木
-  category: 2
-  region: 大阪
+  region: 滋�
+- category: 2
   extractor_type: yagi_table
+  name: 株式会社八木
   price_url: https://yagimetal.com/works/service
-- name: 株式会社のぞみ金�
-  category: 2
-  region: 愛知
+  region: 大阪
+- category: 2
   extractor_type: auto
+  name: 株式会社のぞみ金�
   price_url: https://nozomi-k.jp/fee/item2/
   price_urls:
   - https://nozomi-k.jp/fee/item2/
   - https://nozomi-k.jp/fee/item1/
   - https://nozomi-k.jp/fee/item3/
   - https://nozomi-k.jp/fee/item6/
-- name: TST貿易（千葉�
-  category: 2
-  region: 卑�
+  region: 愛知
+- category: 2
   extractor_type: auto
+  name: TST貿易（千葉�
   price_url: https://in-tst.jp/product/product.php?lang=cn&class2=119
   price_urls:
   - https://in-tst.jp/product/product.php?lang=cn&class2=119
@@ -202,14 +201,14 @@ sites:
   - https://in-tst.jp/product/product.php?lang=cn&class2=114
   - https://in-tst.jp/product/product.php?lang=cn&class2=113
   - https://in-tst.jp/product/product.php?lang=cn&class2=164
-- name: 三和金属�式会社
-  category: 2
+  region: 卑�
+- category: 2
+  extractor_type: auto
+  name: 三和金属�式会社
   region: 沖縜�
+- category: 2
   extractor_type: auto
-- name: ��檼�ABC
-  category: 2
-  region: 京都
-  extractor_type: auto
+  name: ��檼�ABC
   price_url: https://abcmetal.jp/kakaku/hitetsu/dou/
   price_urls:
   - https://abcmetal.jp/kakaku/hitetsu/dou/
@@ -217,25 +216,25 @@ sites:
   - https://abcmetal.jp/kakaku/hitetsu/alumi/
   - https://abcmetal.jp/kakaku/hitetsu/houkin/
   - https://abcmetal.jp/kakaku/hitetsu/sus/
-- name: 有限会社　八尾アルミセンター
-  category: 1
-  region: 大阪
-  price_url: https://peraichi.com/landing_pages/view/yaoalumi/
-  extractor_type: div_list
+  region: 京都
+- category: 1
   container_selector: .s_card-topImg-4col
-  item_selector: .m_card-topImg
-  text_selector: .e_txt
-- name: 株式会社 ヒラノヤ
-  category: 2
-  region: 大阪
-  price_url: https://hiranoyasan.com/all-items/
   extractor_type: div_list
-  extraction_type: item_box
-  box_class: item-box
-- name: 鴻陽産業株式会社 岐阜工場
+  item_selector: .m_card-topImg
+  name: 有限会社　八尾アルミセンター
+  price_url: https://peraichi.com/landing_pages/view/yaoalumi/
+  region: 大阪
+  text_selector: .e_txt
+- box_class: item-box
   category: 2
-  region: 岐阜
+  extraction_type: item_box
+  extractor_type: div_list
+  name: 株式会社 ヒラノヤ
+  price_url: https://hiranoyasan.com/all-items/
+  region: 大阪
+- category: 2
   extractor_type: auto
+  name: 鴻陽産業株式会社 岐阜工場
   price_url: https://www.soou-kinzoku.com/item/index/1
   price_urls:
   - https://www.soou-kinzoku.com/item/index/1
@@ -244,13 +243,14 @@ sites:
   - https://www.soou-kinzoku.com/item/index/7
   - https://www.soou-kinzoku.com/item/index/2
   - https://www.soou-kinzoku.com/item/index/8
-- name: 株式会社 大垣金属
-  category: 2
   region: 岐阜
+- category: 2
   extractor_type: auto
+  name: 株式会社 大垣金属
   price_url: https://oogakikinzoku.com/purchaceditem/
-- name: 高橋商事株式会社
-  category: 2
-  region: 山梨
+  region: 岐阜
+- category: 2
   extractor_type: takahashi_kaitori
+  name: 高橋商事株式会社
   price_url: http://www.takahashisyouji.co.jp/index.html
+  region: 山梨

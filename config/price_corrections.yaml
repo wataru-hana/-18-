@@ -140,32 +140,18 @@ corrections:
   土金（大阪）:
     remove:
     - アルミホイール
-    add:
-    - material: 並銅
-      price: 1610円
-    - material: 雑線S（80%）
-      price: 1310円
-    - material: 雑線A（60%）
-      price: 990円
-    - material: 砲金
-      price: 1450円
+    # スクレイピングで自動取得するため、addセクションは不要
+    # Webサイトの価格表が更新されれば自動的に新しい価格を取得
     modify:
+    # 材料名の統一のみ（価格は上書きしない）
     - material: ピカ銅
-      price: 1710円
       material_new: ピカ銅（上銅）
-    - material: 真鍮
-      price: '1090'
     - material: SUS304
-      price: 180円
       material_new: SUS304（ステンレス上）
-    - material: 鉛バッテリー
-      price: 100円
-    - material: VA線
-      price: '740'
-    - material: アルミ缶　バラ
-      price: '150'
-    - material: アルミ缶　プレス
-      price: '240'
+    - material: 雑線S（80%）
+      material_new: 雑線80%
+    - material: 雑線A（60%）
+      material_new: 雑線60%-65%
   株式会社 春日商会　富山支店:
     remove:
     - 雑旋
@@ -336,75 +322,39 @@ corrections:
     - material: ステンレス304
       price: '150'
   東起産業（株）:
-    add:
-    - material: ピカ銅
-      price: 1720円/kg
-    - material: 並銅
-      price: 1650円/kg
-    - material: 砲金
-      price: 1400円/kg
-    - material: 真鍮
-      price: 1100円/kg
-    - material: 雑線80%
-      price: 1300円/kg
-    - material: 雑線60%-65%
-      price: 950円/kg
-    - material: VA線
-      price: 400円/kg
-    - material: アルミホイール
-      price: 380円/kg
-    - material: アルミサッシ
-      price: 350円/kg
-    - material: アルミ缶バラ
-      price: 150円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
+    # スクレイピングで自動取得するため、addセクションは不要
+    # Webサイトの価格表が更新されれば自動的に新しい価格を取得
     modify:
-    - material: ピカ銅
-      price: '1730'
-    - material: 砲金
-      price: '1450'
-    - material: 雑線60%-65%
-      price: '950'
-    - material: VA線
-      price: '710'
-    - material: アルミホイール
-      price: '400'
-    - material: アルミサッシ
-      price: '380'
-    - material: ステンレス304
-      price: '170'
+    # 材料名の統一のみ（価格は上書きしない）
+    - material: 真鍮A
+      material_new: 真鍮
+    - material: 一本線80%
+      material_new: 雑線80%
+    - material: 三本線65%
+      material_new: 雑線60%-65%
+    - material: アルミサッシA 付物なし
+      material_new: アルミサッシ
+    - material: 自動車バッテリー
+      material_new: 鉛バッテリー
+    - material: ステンレス
+      material_new: ステンレス304
   鴻祥貿易株式会社:
-    add:
-    - material: ピカ銅
-      price: 1700円/kg
-    - material: 並銅
-      price: 1600円/kg
-    - material: 真鍮
-      price: 1520円/kg
-    - material: 雑線80%
-      price: 1300円/kg
-    - material: 雑線60%-65%
-      price: 950円/kg
-    - material: VA線
-      price: 700円/kg
-    - material: アルミホイール
-      price: 380円/kg
-    - material: アルミサッシ
-      price: 360円/kg
-    - material: アルミ缶バラ
-      price: 280円/kg
-    - material: アルミ缶プレス
-      price: 280円/kg
-    - material: ステンレス304
-      price: 175円/kg
-    - material: 鉛バッテリー
-      price: 108円/kg
+    # スクレイピングで自動取得するため、addセクションは不要
+    # Webサイトの価格表が更新されれば自動的に新しい価格を取得
     modify:
-    - material: ステンレス304
-      price: '175'
+    # 材料名の統一のみ（価格は上書きしない）
+    - material: 込銅
+      material_new: 並銅
+    - material: 上線
+      material_new: 雑線80%
+    - material: ねずみ線
+      material_new: VA線
+    - material: アルミサッシA
+      material_new: アルミサッシ
+    - material: ステンレス 304
+      material_new: ステンレス304
+    - material: バッテリー
+      material_new: 鉛バッテリー
   安城貿易（愛知）:
     add:
     - material: ピカ銅
