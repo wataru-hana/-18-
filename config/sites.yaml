@@ -46,12 +46,12 @@ sites:
   region: 鳥�
 - category: 2
   extractor_type: touki_dl
-  name: 東起産業��檼
+  name: 東起産業（株）
   price_url: https://touki-sangyou.co.jp/
   region: 香�
 - category: 2
   extractor_type: dokin_div
-  name: 土�߼�大阪�
+  name: 土金（大阪）
   price_url: https://www.dokindokin.com/scrap/
   region: 大阪
 - category: 2
@@ -82,7 +82,7 @@ sites:
   region: 大阪
 - category: 2
   extractor_type: kousyo_box
-  name: 鴻祥貿易�式会社
+  name: 鴻祥貿易株式会社
   price_url: https://kousyo-boueki.jp/scrap_nonferrous.html
   region: 大阪
 - category: 2
