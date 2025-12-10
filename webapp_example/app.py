@@ -12,8 +12,20 @@ import os
 import re
 
 # 既存のスクレイパーモジュールをインポート
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scrapers import Category1Scraper, Category2Scraper
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+print(f"DEBUG: Parent directory: {parent_dir}")
+print(f"DEBUG: Scrapers path exists: {os.path.exists(os.path.join(parent_dir, 'scrapers'))}")
+print(f"DEBUG: Scrapers __init__.py exists: {os.path.exists(os.path.join(parent_dir, 'scrapers', '__init__.py'))}")
+
+try:
+    from scrapers import Category1Scraper, Category2Scraper
+    print("DEBUG: Successfully imported scrapers")
+except ImportError as e:
+    print(f"DEBUG: Import error: {e}")
+    import traceback
+    traceback.print_exc()
+    raise
 import yaml
 
 app = Flask(__name__)
@@ -192,6 +204,11 @@ def start_scraping():
                 target_items_config=target_items
             )
             
+            # デバッグ: resultの内容を確認
+            print(f"DEBUG {company_name}: result type={type(result)}, keys={result.keys() if isinstance(result, dict) else 'N/A'}")
+            if isinstance(result, dict):
+                print(f"DEBUG {company_name}: prices type={type(result.get('prices'))}, value={result.get('prices')}")
+            
             # 企業名を正規化
             company_name_normalized = normalize_company_name(company_name)
             result['company_name'] = company_name_normalized
@@ -216,6 +233,8 @@ def start_scraping():
             
             # 価格データを保存
             prices = result.get('prices', {})
+            if not isinstance(prices, dict):
+                raise ValueError(f"prices is not a dict: {type(prices)}, value={prices}")
             for material_name, price_value in prices.items():
                 price_data = PriceData(
                     company_id=company.id,
@@ -232,10 +251,15 @@ def start_scraping():
             })
         
         except Exception as e:
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"エラー発生: {company_name}")
+            print(f"エラー内容: {str(e)}")
+            print(f"詳細: {error_detail}")
             results.append({
                 'company': company_name,
                 'status': 'error',
-                'error': str(e)
+                'error': f"{str(e)}: {error_detail[:200]}"
             })
     
     db.session.commit()
@@ -713,7 +737,12 @@ def normalize_price(price_str):
 
 def apply_price_corrections_single(result, correction):
     """単一の結果に価格修正を適用（scrape_18_companies_to_excel.pyと同じロジック）"""
-    prices = result.get('prices', {}).copy()
+    prices_raw = result.get('prices', {})
+    if not isinstance(prices_raw, dict):
+        print(f"WARNING: prices is not a dict: {type(prices_raw)}, value={prices_raw}")
+        prices = {}
+    else:
+        prices = prices_raw.copy()
     
     # remove処理
     if 'remove' in correction:
