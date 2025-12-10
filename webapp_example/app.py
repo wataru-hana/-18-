@@ -573,12 +573,17 @@ def download_excel():
         company_name_normalized = normalize_company_name(company.name)
         material_name = price_data.material_name
         
-        # 材料名を正規化
+        # 材料名を正規化（より具体的なマッピングを優先）
         normalized_material = None
+        best_match_length = 0
+        
         for key, value in MATERIAL_MAPPING.items():
             if key in material_name or material_name in key:
-                normalized_material = value
-                break
+                # より長いマッチを優先（より具体的なマッピング）
+                match_length = len(key) if key in material_name else len(material_name)
+                if match_length > best_match_length:
+                    normalized_material = value
+                    best_match_length = match_length
         
         if not normalized_material:
             continue
