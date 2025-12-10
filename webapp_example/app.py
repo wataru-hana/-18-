@@ -215,7 +215,17 @@ def start_scraping():
             
             # 価格修正マッピングを適用
             if company_name_normalized in corrections:
-                result = apply_price_corrections_single(result, corrections[company_name_normalized])
+                try:
+                    correction_config = corrections[company_name_normalized]
+                    if not isinstance(correction_config, dict):
+                        print(f"WARNING: correction_config is not a dict for {company_name_normalized}: {type(correction_config)}")
+                    else:
+                        result = apply_price_corrections_single(result, correction_config)
+                except Exception as e:
+                    print(f"ERROR in apply_price_corrections_single for {company_name_normalized}: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # エラーが発生しても続行（修正なしで続ける）
             
             # データベースに保存
             company = Company.query.filter_by(name=company_name_normalized).first()
@@ -737,6 +747,14 @@ def normalize_price(price_str):
 
 def apply_price_corrections_single(result, correction):
     """単一の結果に価格修正を適用（scrape_18_companies_to_excel.pyと同じロジック）"""
+    if not isinstance(result, dict):
+        print(f"ERROR: result is not a dict: {type(result)}")
+        return result
+    
+    if not isinstance(correction, dict):
+        print(f"ERROR: correction is not a dict: {type(correction)}")
+        return result
+    
     prices_raw = result.get('prices', {})
     if not isinstance(prices_raw, dict):
         print(f"WARNING: prices is not a dict: {type(prices_raw)}, value={prices_raw}")
@@ -745,7 +763,7 @@ def apply_price_corrections_single(result, correction):
         prices = prices_raw.copy()
     
     # remove処理
-    if 'remove' in correction:
+    if 'remove' in correction and isinstance(correction['remove'], list):
         for material in correction['remove']:
             materials_to_remove = []
             for material_key in prices.keys():
@@ -757,21 +775,34 @@ def apply_price_corrections_single(result, correction):
                     del prices[material_key]
     
     # add処理
-    if 'add' in correction:
+    if 'add' in correction and isinstance(correction['add'], list):
         for item in correction['add']:
-            material_name = item['material']
-            price_value = item['price']
-            price_normalized = normalize_price(price_value)
-            if price_normalized:
-                prices[material_name] = price_normalized
+            if isinstance(item, dict) and 'material' in item and 'price' in item:
+                material_name = item['material']
+                price_value = item['price']
+                price_normalized = normalize_price(price_value)
+                if price_normalized:
+                    prices[material_name] = price_normalized
     
     # modify処理
-    if 'modify' in correction:
+    if 'modify' in correction and isinstance(correction['modify'], list):
         for item in correction['modify']:
-            old_material = item['material']
-            new_price = item['price']
+            if not isinstance(item, dict):
+                continue
+            old_material = item.get('material')
+            if not old_material:
+                continue
+            new_price = item.get('price')
             new_material = item.get('material_new', old_material)
-            price_normalized = normalize_price(new_price)
+            
+            # priceが存在する場合のみ正規化
+            price_normalized = None
+            if new_price:
+                try:
+                    price_normalized = normalize_price(new_price)
+                except Exception as e:
+                    print(f"WARNING: Failed to normalize price '{new_price}': {e}")
+                    price_normalized = None
             
             # 材料名の部分一致で検索
             matched_material = None
@@ -782,12 +813,14 @@ def apply_price_corrections_single(result, correction):
             
             if matched_material:
                 if new_material != old_material:
+                    # 材料名を変更（価格は既存の価格を維持）
+                    prices[new_material] = prices[matched_material]
+                    del prices[matched_material]
+                    # 価格が指定されている場合は上書き
                     if price_normalized:
                         prices[new_material] = price_normalized
-                    else:
-                        prices[new_material] = prices[matched_material]
-                    del prices[matched_material]
                 else:
+                    # 材料名は同じで価格のみ変更
                     if price_normalized:
                         prices[matched_material] = price_normalized
     
