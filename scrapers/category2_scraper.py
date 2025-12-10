@@ -709,6 +709,26 @@ class Category2Scraper(BaseScraper):
                     
                     # 材料名が有効な場合のみ追加
                     if material and len(material) > 0 and len(material) < 30:
+                        # より具体的な材料名を優先するルール
+                        # 1. 「砲金」を「込砲金」より優先
+                        if material == '砲金' and '込砲金' in prices:
+                            del prices['込砲金']
+                        
+                        # 2. 「ステンレス（上）」を「ステンレス（下）」より優先
+                        if material == 'ステンレス（上）' and 'ステンレス（下）' in prices:
+                            del prices['ステンレス（下）']
+                        
+                        # 3. 「バッテリー（上）」を「バッテリー（下）」より優先
+                        if material == 'バッテリー（上）' and 'バッテリー（下）' in prices:
+                            del prices['バッテリー（下）']
+                        
+                        # 4. 「アルミ缶（プレス）」の価格260円を「アルミ缶」に設定
+                        if material == 'アルミ缶（プレス）':
+                            # 「アルミ缶（プレス）」の価格を「アルミ缶」に設定
+                            prices['アルミ缶'] = price
+                            # 「アルミ缶（プレス）」は保存しない
+                            continue
+                        
                         # 重複を避けるため、既に存在しない場合のみ追加
                         if material not in prices:
                             prices[material] = price
