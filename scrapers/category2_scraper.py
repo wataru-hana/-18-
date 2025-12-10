@@ -284,12 +284,8 @@ class Category2Scraper(BaseScraper):
             # 材料名を取得
             item_p = box.find('p', class_='item')
             if item_p:
-                # <br>や<small>タグを除去して材料名を取得
-                material = item_p.get_text(separator=' ', strip=True)
-                # <small>タグ内のテキストを除去
-                for small in item_p.find_all('small'):
-                    small.decompose()
-                material = item_p.get_text(strip=True)
+                # <br>を除去して材料名を取得（smallタグは含める）
+                material = item_p.get_text(separator='', strip=True)
             else:
                 continue
             
