@@ -410,13 +410,20 @@ class Category2Scraper(BaseScraper):
                             continue
                     
                     if material and price:
-                        # 材料名に追加情報がある場合は、それを含める
-                        price_context = price_p.get_text(strip=True)
-                        if len(price_context) > len(price_text) and len(price_context) < 50:
-                            material_with_context = f"{material} ({price_context.replace(price_text, '').strip()})"
-                            prices[material_with_context] = price
-                        else:
-                            prices[material] = price
+                        # 価格の数値を抽出して比較
+                        price_num_match = re.search(r'(\d+)', price)
+                        if price_num_match:
+                            price_num = int(price_num_match.group(1))
+                            
+                            # 同じ材料名が既に存在する場合、より高い価格を選択
+                            if material in prices:
+                                existing_price_match = re.search(r'(\d+)', prices[material])
+                                if existing_price_match:
+                                    existing_price_num = int(existing_price_match.group(1))
+                                    if price_num > existing_price_num:
+                                        prices[material] = price
+                            else:
+                                prices[material] = price
                     break
         
         return prices
