@@ -1,0 +1,160 @@
+/Users/wataruhanamitsu/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+エラー: https://www.sanadakogyo.com/scrap_metal.html - HTTPSConnectionPool(host='www.sanadakogyo.com', port=443): Max retries exceeded with url: /scrap_metal.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.sanadakogyo.com/scrap_metal.html
+エラー: https://www.kaneda-shouji.co.jp/product#a12 - HTTPSConnectionPool(host='www.kaneda-shouji.co.jp', port=443): Max retries exceeded with url: /product (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.kaneda-shouji.co.jp/product#a12
+エラー: https://kimura-metal.co.jp/price.html#07-01 - HTTPSConnectionPool(host='kimura-metal.co.jp', port=443): Max retries exceeded with url: /price.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://kimura-metal.co.jp/price.html#07-01
+エラー: https://www.meikinboueki.com/ - HTTPSConnectionPool(host='www.meikinboueki.com', port=443): Max retries exceeded with url: / (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.meikinboueki.com/
+エラー: https://touki-sangyou.co.jp/ - HTTPSConnectionPool(host='touki-sangyou.co.jp', port=443): Max retries exceeded with url: / (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://touki-sangyou.co.jp/
+エラー: https://www.dokindokin.com/scrap/ - HTTPSConnectionPool(host='www.dokindokin.com', port=443): Max retries exceeded with url: /scrap/ (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.dokindokin.com/scrap/
+エラー: https://www.ohata.org/kakaku.html - HTTPSConnectionPool(host='www.ohata.org', port=443): Max retries exceeded with url: /kakaku.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.ohata.org/kakaku.html
+エラー: https://www.senfuku.net/scrap - HTTPSConnectionPool(host='www.senfuku.net', port=443): Max retries exceeded with url: /scrap (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.senfuku.net/scrap
+エラー: https://kousyo-boueki.jp/scrap_nonferrous.html - HTTPSConnectionPool(host='kousyo-boueki.jp', port=443): Max retries exceeded with url: /scrap_nonferrous.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://kousyo-boueki.jp/scrap_nonferrous.html
+エラー: https://houyama.com/price.html - HTTPSConnectionPool(host='houyama.com', port=443): Max retries exceeded with url: /price.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://houyama.com/price.html
+エラー: https://haruhi-shokai.com/scrap_nonferrous2.html - HTTPSConnectionPool(host='haruhi-shokai.com', port=443): Max retries exceeded with url: /scrap_nonferrous2.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://haruhi-shokai.com/scrap_nonferrous2.html
+エラー: https://haruhi-shokai.com/scrap_nonferrous3.html - HTTPSConnectionPool(host='haruhi-shokai.com', port=443): Max retries exceeded with url: /scrap_nonferrous3.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://haruhi-shokai.com/scrap_nonferrous3.html
+エラー: https://haruhi-shokai.com/scrap_nonferrous1.html - HTTPSConnectionPool(host='haruhi-shokai.com', port=443): Max retries exceeded with url: /scrap_nonferrous1.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://haruhi-shokai.com/scrap_nonferrous1.html
+エラー: https://www.anjyo-t.com/scrap_metal.html - HTTPSConnectionPool(host='www.anjyo-t.com', port=443): Max retries exceeded with url: /scrap_metal.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://www.anjyo-t.com/scrap_metal.html
+エラー: https://touhokuking.com/scrap_copper.html - HTTPSConnectionPool(host='touhokuking.com', port=443): Max retries exceeded with url: /scrap_copper.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://touhokuking.com/scrap_copper.html
+エラー: https://touhokuking.com/scrap_nonferrous.html - HTTPSConnectionPool(host='touhokuking.com', port=443): Max retries exceeded with url: /scrap_nonferrous.html (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://touhokuking.com/scrap_nonferrous.html
+エラー: https://yagimetal.com/works/service - HTTPSConnectionPool(host='yagimetal.com', port=443): Max retries exceeded with url: /works/service (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://yagimetal.com/works/service
+エラー: https://peraichi.com/landing_pages/view/yaoalumi/ - HTTPSConnectionPool(host='peraichi.com', port=443): Max retries exceeded with url: /landing_pages/view/yaoalumi/ (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://peraichi.com/landing_pages/view/yaoalumi/
+エラー: https://hiranoyasan.com/all-items/ - HTTPSConnectionPool(host='hiranoyasan.com', port=443): Max retries exceeded with url: /all-items/ (Caused by SSLError(PermissionError(1, 'Operation not permitted')))
+HTML取得失敗: https://hiranoyasan.com/all-items/
+================================================================================
+各社マッピング状況レポート
+生成日時: 2025-12-28 22:02:14
+================================================================================
+
+[1/18] 眞田鋼業株式会社
+URL: https://www.sanadakogyo.com/scrap_metal.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[2/18] 有限会社金田商事
+URL: https://www.kaneda-shouji.co.jp/product#a12
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[3/18] 木村金属（大阪）
+URL: https://kimura-metal.co.jp/price.html#07-01
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[4/18] 明鑫貿易株式会社
+URL: https://www.meikinboueki.com/
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[5/18] 東起産業（株）
+URL: https://touki-sangyou.co.jp/
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[6/18] 土金（大阪）
+URL: https://www.dokindokin.com/scrap/
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[7/18] 大畑商事（千葉・大阪）
+URL: https://www.ohata.org/kakaku.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[8/18] 千福商会（大阪）
+URL: https://www.senfuku.net/scrap
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[9/18] 鴻祥貿易株式会社
+URL: https://kousyo-boueki.jp/scrap_nonferrous.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[10/18] 株式会社鳳山
+URL: https://houyama.com/price.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[11/18] 株式会社 春日商会　富山支店
+URL: https://haruhi-shokai.com/scrap_nonferrous2.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[12/18] 株式会社 春日商会　滋賀支店
+URL: https://haruhi-shokai.com/scrap_nonferrous3.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[13/18] 株式会社 春日商会　一宮本社
+URL: https://haruhi-shokai.com/scrap_nonferrous1.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[14/18] 安城貿易（愛知）
+URL: https://www.anjyo-t.com/scrap_metal.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[15/18] 東北キング
+URL: https://touhokuking.com/scrap_copper.html
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[16/18] 株式会社八木
+URL: https://yagimetal.com/works/service
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[17/18] 有限会社　八尾アルミセンター
+URL: https://peraichi.com/landing_pages/view/yaoalumi/
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+[18/18] 株式会社 ヒラノヤ
+URL: https://hiranoyasan.com/all-items/
+------------------------------------------------------------
+  価格情報を取得できませんでした
+
+
+================================================================================
+サマリー
+================================================================================
+
+未マッピングのアイテムはありません。
+
+レポート生成完了
