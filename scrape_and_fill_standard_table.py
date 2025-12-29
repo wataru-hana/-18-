@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# 実装済み18社のリスト（正規化された企業名）
+# 実装済み会社のリスト（正規化された企業名）
 IMPLEMENTED_COMPANIES = {
     '眞田鋼業株式会社',
     '有限会社金田商事',
@@ -44,6 +44,9 @@ IMPLEMENTED_COMPANIES = {
     '株式会社八木',
     '有限会社　八尾アルミセンター',
     '株式会社 ヒラノヤ',
+    '鴻陽産業株式会社 岐阜工場',
+    '株式会社 大垣金属',
+    '高橋商事株式会社',
 }
 
 # 材料名のマッピング（取得した材料名 → 正規の表の列名）
@@ -270,6 +273,11 @@ COMPANY_NAME_MAPPING = {
     '株式会社鳳山': '株式会社鳳山',
     '東北キング': '東北キング',
     '有限会社金田商事': '有限会社金田商事',
+    '鴻陽産業株式会社 岐阜工場': '鴻陽産業株式会社 岐阜工場',
+    '鴻陽産業株式会社　岐阜工場': '鴻陽産業株式会社 岐阜工場',
+    '株式会社 大垣金属': '株式会社 大垣金属',
+    '株式会社　大垣金属': '株式会社 大垣金属',
+    '高橋商事株式会社': '高橋商事株式会社',
 }
 
 def normalize_company_name(name):
@@ -362,7 +370,11 @@ def load_price_corrections(config_path: str = 'config/price_corrections.yaml'):
         return {}
 
 def apply_price_corrections(results, corrections):
-    """価格修正マッピングを適用"""
+    """価格修正マッピングを適用
+    
+    処理順序: remove → modify → add
+    ※addを最後に適用することで、正しい価格が確実に設定される
+    """
     corrected_results = []
     
     for result in results:
@@ -372,30 +384,28 @@ def apply_price_corrections(results, corrections):
         if company_name in corrections:
             correction = corrections[company_name]
             
+            # 1. remove: 不要な材料を削除
             if 'remove' in correction:
                 for material in correction['remove']:
                     if material in prices:
                         del prices[material]
             
-            if 'add' in correction:
-                for item in correction['add']:
-                    prices[item['material']] = item['price']
-            
+            # 2. modify: 材料名の変換（マッピング）のみ行う
+            # ※価格の変更はaddで行う
             if 'modify' in correction:
                 for item in correction['modify']:
                     old_material = item['material']
-                    new_price = item['price']
                     new_material = item.get('material_new', old_material)
                     
-                    if old_material in prices:
-                        if new_material != old_material:
-                            if new_price == new_material or new_price == old_material:
-                                prices[new_material] = prices[old_material]
-                            else:
-                                prices[new_material] = new_price
-                            del prices[old_material]
-                        else:
-                            prices[old_material] = new_price
+                    if old_material in prices and new_material != old_material:
+                        # 材料名のみ変換（値はそのまま移行）
+                        prices[new_material] = prices[old_material]
+                        del prices[old_material]
+            
+            # 3. add: 正しい価格を追加・上書き（最後に実行して確実に反映）
+            if 'add' in correction:
+                for item in correction['add']:
+                    prices[item['material']] = item['price']
         
         corrected_result = result.copy()
         corrected_result['prices'] = prices
@@ -517,9 +527,18 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
     # ヘッダー行を取得
     header_row = [ws_standard.cell(row=1, column=col) for col in range(1, ws_standard.max_column + 1)]
     header_materials = {}
+    
+    # 除外するヘッダー名（統合により不要になった列）
+    EXCLUDED_HEADERS = {'バラアルミ缶', 'アルミ缶バラ', 'アルミ缶プレス'}
+    
     for col_idx, cell in enumerate(header_row, 1):
         if cell.value:
-            header_materials[str(cell.value).strip()] = col_idx
+            header_name = str(cell.value).strip()
+            # 除外リストに含まれる列はスキップ
+            if header_name not in EXCLUDED_HEADERS:
+                header_materials[header_name] = col_idx
+            else:
+                logger.info(f"除外された列: {header_name} (列{col_idx})")
     
     logger.info(f"ヘッダー材料: {list(header_materials.keys())}")
     
