@@ -103,38 +103,33 @@ corrections:
     - material: 自動車用 鉛バッテリー
       material_new: 鉛バッテリー
   株式会社 ヒラノヤ:
+    # サイト上の表記: 並銅, 砲金, 真鍮, 銅線（80%以上）, 銅線（60%以上）, 
+    # VA線(VVF・Fｹｰﾌﾞﾙ), アルミホイールA
     add:
     - material: 並銅
-      price: 1,560円
+      price: 1780円/kg
     - material: 砲金
-      price: 1,430円
+      price: 1580円/kg
     - material: 真鍮
-      price: 1,050円
-    - material: 銅線（80%以上）
-      price: 1,240円
-    - material: 銅線（60%以上）
-      price: 930円
-    - material: VA線
-      price: 700円
-    - material: アルミホイール
-      price: 350円
-    modify:
-    - material: 並銅
-      price: '1630'
-    - material: 砲金
-      price: '1460'
-    - material: 真鍮
-      price: '1080'
+      price: 1140円/kg
     - material: 雑線80%
-      price: '1300'
+      price: 1300円/kg
     - material: 雑線60%-65%
-      price: '960'
+      price: 1000円/kg
     - material: VA線
-      price: '720'
+      price: 750円/kg
     - material: アルミホイール
-      price: '370'
-    - material: アルミ缶
-      price: '150'
+      price: 380円/kg
+    modify:
+    # サイト上の表記 → 標準アイテム名
+    - material: 銅線（80%以上）
+      material_new: 雑線80%
+    - material: 銅線（60%以上）
+      material_new: 雑線60%-65%
+    - material: VA線(VVF・Fｹｰﾌﾞﾙ)
+      material_new: VA線
+    - material: アルミホイールA
+      material_new: アルミホイール
   木村金属（大阪）:
     # サイト上の表記: 並銅
     remove:
@@ -196,7 +191,7 @@ corrections:
       material_new: 鉛バッテリー
   千福商会（大阪）:
     # サイト上の表記: ピカ線一号, 並銅, 砲金, 込真鍮, 銅線A（80%↑）, 銅線C（60%↑）, VA線,
-    # アルミホイール, アルミサッシビス付, ステンレス屑, カーバッテリー
+    # アルミホイール, アルミサッシ上, ステンレス屑, カーバッテリー
     # ※アルミ缶は取り扱いなし
     remove:
     - アルミ缶
@@ -218,7 +213,7 @@ corrections:
     - material: アルミホイール
       price: 400円/kg
     - material: アルミサッシ
-      price: 330円/kg
+      price: 340円/kg
     - material: ステンレス304
       price: 170円/kg
     - material: 鉛バッテリー
@@ -229,6 +224,8 @@ corrections:
       material_new: ピカ銅
     - material: 込真鍮
       material_new: 真鍮
+    - material: アルミサッシ上
+      material_new: アルミサッシ
     - material: 銅線A（80%↑）
       material_new: 雑線80%
     - material: 銅線C（60%↑）
