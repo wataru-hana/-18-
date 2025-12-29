@@ -242,41 +242,64 @@ MATERIAL_MAPPING = {
     '鉛': '鉛バッテリー',
 }
 
-# 企業名のマッピング（文字化け対応）
+# 企業名のマッピング（文字化け対応・正規化）
+# キー: sites.yamlでの表記名または文字化け名
+# 値: 正規化後の名前（IMPLEMENTED_COMPANIESと一致させる）
 COMPANY_NAME_MAPPING = {
+    # 眞田鋼業
     '眞田鋼業株式会社': '眞田鋼業株式会社',
-    '明鑫貿易株式会社': '明鑫貿易�式会社',
-    '明鑫貿易�式会社': '明鑫貿易株式会社',
-    '東起産業（株）': '東起産業��檼',
-    '東起産業��檼': '東起産業（株）',
-    '鴻祥貿易株式会社': '鴻祥貿易�式会社',
-    '鴻祥貿易�式会社': '鴻祥貿易株式会社',
-    '安城貿易（愛知）': '安城貿易（�知�',
-    '安城貿易（�知�': '安城貿易（愛知）',
-    '千福商会（大阪）': '卦�商会（大阪�',
-    '卦�商会（大阪�': '千福商会（大阪）',
-    '土金（大阪）': '土�߼�大阪�',
-    '土�߼�大阪�': '土金（大阪）',
-    '大畑商事（千葉・大阪）': '大畑商事（千葉�大阪�',
-    '大畑商事（千葉�大阪�': '大畑商事（千葉・大阪）',
-    '木村金属（大阪）': '木村��属（大阪�',
-    '木村��属（大阪�': '木村金属（大阪）',
-    '株式会社 春日商会　富山支店': '株式会社 春日啼 富山支�',
-    '株式会社 春日啼 富山支�': '株式会社 春日商会　富山支店',
-    '株式会社 春日商会　滋賀支店': '株式会社 春日啼 滋�支�',
-    '株式会社 春日啼 滋�支�': '株式会社 春日商会　滋賀支店',
-    '株式会社 春日商会　一宮本社': '株式会社 春日啼 �宮本社',
-    '株式会社 春日啼 �宮本社': '株式会社 春日商会　一宮本社',
-    '株式会社八木': '株式会社八木',
-    '有限会社　八尾アルミセンター': '有限会社　八尾アルミセンター',
-    '株式会社 ヒラノヤ': '株式会社 ヒラノヤ',
-    '株式会社鳳山': '株式会社鳳山',
-    '東北キング': '東北キング',
+    # 金田商事
     '有限会社金田商事': '有限会社金田商事',
+    # 木村金属
+    '木村金属（大阪）': '木村金属（大阪）',
+    '木村��属（大阪�': '木村金属（大阪）',
+    # 明鑫貿易
+    '明鑫貿易株式会社': '明鑫貿易株式会社',
+    '明鑫貿易�式会社': '明鑫貿易株式会社',
+    # 東起産業
+    '東起産業（株）': '東起産業（株）',
+    '東起産業（株）': '東起産業（株）',
+    '東起産業��檼': '東起産業（株）',
+    # 土金
+    '土金（大阪）': '土金（大阪）',
+    '土金（大阪）': '土金（大阪）',
+    '土�߼�大阪�': '土金（大阪）',
+    # 大畑商事
+    '大畑商事（千葉・大阪）': '大畑商事（千葉・大阪）',
+    '大畑商事（千葉�大阪�': '大畑商事（千葉・大阪）',
+    # 千福商会
+    '千福商会（大阪）': '千福商会（大阪）',
+    '卦�商会（大阪�': '千福商会（大阪）',
+    # 鴻祥貿易
+    '鴻祥貿易株式会社': '鴻祥貿易株式会社',
+    '鴻祥貿易�式会社': '鴻祥貿易株式会社',
+    # 株式会社鳳山
+    '株式会社鳳山': '株式会社鳳山',
+    # 春日商会
+    '株式会社 春日商会　富山支店': '株式会社 春日商会　富山支店',
+    '株式会社 春日啼 富山支�': '株式会社 春日商会　富山支店',
+    '株式会社 春日商会　滋賀支店': '株式会社 春日商会　滋賀支店',
+    '株式会社 春日啼 滋�支�': '株式会社 春日商会　滋賀支店',
+    '株式会社 春日商会　一宮本社': '株式会社 春日商会　一宮本社',
+    '株式会社 春日啼 �宮本社': '株式会社 春日商会　一宮本社',
+    # 安城貿易
+    '安城貿易（愛知）': '安城貿易（愛知）',
+    '安城貿易（�知�': '安城貿易（愛知）',
+    # 東北キング
+    '東北キング': '東北キング',
+    # 株式会社八木
+    '株式会社八木': '株式会社八木',
+    # 八尾アルミセンター
+    '有限会社　八尾アルミセンター': '有限会社　八尾アルミセンター',
+    # ヒラノヤ
+    '株式会社 ヒラノヤ': '株式会社 ヒラノヤ',
+    # 鴻陽産業
     '鴻陽産業株式会社 岐阜工場': '鴻陽産業株式会社 岐阜工場',
     '鴻陽産業株式会社　岐阜工場': '鴻陽産業株式会社 岐阜工場',
+    # 大垣金属
     '株式会社 大垣金属': '株式会社 大垣金属',
     '株式会社　大垣金属': '株式会社 大垣金属',
+    # 高橋商事
     '高橋商事株式会社': '高橋商事株式会社',
 }
 
@@ -336,16 +359,42 @@ def filter_implemented_companies(sites):
         normalized_name = normalize_company_name(company_name)
         
         # 実装済みリストに含まれているか確認
-        if normalized_name not in IMPLEMENTED_COMPANIES:
+        is_implemented = False
+        matched_impl_name = None
+        
+        # 完全一致を優先
+        if normalized_name in IMPLEMENTED_COMPANIES:
+            is_implemented = True
+            matched_impl_name = normalized_name
+        else:
+            # 部分一致で確認
+            for impl_name in IMPLEMENTED_COMPANIES:
+                # 括弧の種類を統一して比較
+                norm1 = normalized_name.replace('（', '(').replace('）', ')').replace('　', ' ')
+                norm2 = impl_name.replace('（', '(').replace('）', ')').replace('　', ' ')
+                if norm1 == norm2 or impl_name in normalized_name or normalized_name in impl_name:
+                    is_implemented = True
+                    matched_impl_name = impl_name
+                    break
+        
+        if not is_implemented:
+            logger.debug(f"未実装企業をスキップ: {company_name} (正規化後: {normalized_name})")
             continue
         
         # 重複チェック（正規化後の名前で）
-        if normalized_name in seen_companies:
-            logger.warning(f"重複をスキップ: {company_name} (正規化後: {normalized_name})")
+        if matched_impl_name in seen_companies:
+            logger.warning(f"重複をスキップ: {company_name} (正規化後: {matched_impl_name})")
             continue
         
-        seen_companies.add(normalized_name)
+        seen_companies.add(matched_impl_name)
+        # サイト設定に正規化後の名前を設定
+        site['normalized_name'] = matched_impl_name
         filtered.append(site)
+    
+    logger.info(f"フィルタリング結果: {len(filtered)}社が実装済み")
+    for impl_name in IMPLEMENTED_COMPANIES:
+        if impl_name not in seen_companies:
+            logger.warning(f"  未マッチ実装企業: {impl_name}")
     
     return filtered
 
@@ -381,13 +430,30 @@ def apply_price_corrections(results, corrections):
         company_name = result.get('company_name', '')
         prices = result.get('prices', {}).copy()
         
+        # 企業名のマッチングを柔軟に
+        matched_correction_key = None
         if company_name in corrections:
-            correction = corrections[company_name]
+            matched_correction_key = company_name
+        else:
+            # 部分一致で探す
+            for key in corrections.keys():
+                if key in company_name or company_name in key:
+                    matched_correction_key = key
+                    break
+                # スペースの違いを無視
+                if key.replace(' ', '').replace('　', '') == company_name.replace(' ', '').replace('　', ''):
+                    matched_correction_key = key
+                    break
+        
+        if matched_correction_key:
+            correction = corrections[matched_correction_key]
+            logger.info(f"  価格修正適用: {company_name} (マッチキー: {matched_correction_key})")
             
             # 1. remove: 不要な材料を削除
             if 'remove' in correction:
                 for material in correction['remove']:
                     if material in prices:
+                        logger.info(f"    remove: {material}")
                         del prices[material]
             
             # 2. modify: 材料名の変換（マッピング）のみ行う
@@ -399,13 +465,20 @@ def apply_price_corrections(results, corrections):
                     
                     if old_material in prices and new_material != old_material:
                         # 材料名のみ変換（値はそのまま移行）
+                        logger.info(f"    modify: {old_material} → {new_material}")
                         prices[new_material] = prices[old_material]
                         del prices[old_material]
             
             # 3. add: 正しい価格を追加・上書き（最後に実行して確実に反映）
             if 'add' in correction:
+                logger.info(f"    add: {len(correction['add'])}件の価格を設定")
                 for item in correction['add']:
-                    prices[item['material']] = item['price']
+                    material = item['material']
+                    price = item['price']
+                    prices[material] = price
+                    logger.info(f"      {material}: {price}")
+        else:
+            logger.warning(f"  価格修正なし（マッチする設定が見つからない）: {company_name}")
         
         corrected_result = result.copy()
         corrected_result['prices'] = prices
@@ -431,7 +504,8 @@ def scrape_implemented_companies():
     for i, site_config in enumerate(sites, 1):
         company_name = site_config.get('name', '不明')
         category = site_config.get('category', 2)
-        normalized_name = normalize_company_name(company_name)
+        # filter_implemented_companiesで設定したnormalized_nameを使用
+        normalized_name = site_config.get('normalized_name', normalize_company_name(company_name))
         
         logger.info(f"\n[{i}/{len(sites)}] 処理中: {company_name} (正規化後: {normalized_name})")
         
@@ -469,14 +543,17 @@ def scrape_implemented_companies():
         
         except Exception as e:
             logger.error(f"  エラー: {company_name} - {str(e)}")
+            # スクレイピングが失敗しても、price_correctionsのaddで価格を設定できるように
+            # 空のprices辞書で結果を追加
             company_results.append({
                 'scraped_at': datetime.now().isoformat(),
                 'url': site_config.get('price_url', ''),
                 'company_name': normalized_name,
                 'region': site_config.get('region', ''),
                 'error': str(e),
-                'prices': {}
+                'prices': {}  # 空の辞書でも、apply_price_correctionsでaddが適用される
             })
+            logger.info(f"    → 価格修正マッピングで価格を設定します")
     
     # 価格修正マッピングを適用
     if price_corrections:
@@ -530,15 +607,26 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
     
     # 除外するヘッダー名（統合により不要になった列）
     EXCLUDED_HEADERS = {'バラアルミ缶', 'アルミ缶バラ', 'アルミ缶プレス'}
+    excluded_columns = []  # 除外する列番号を記録
     
     for col_idx, cell in enumerate(header_row, 1):
         if cell.value:
             header_name = str(cell.value).strip()
-            # 除外リストに含まれる列はスキップ
-            if header_name not in EXCLUDED_HEADERS:
-                header_materials[header_name] = col_idx
+            # 除外リストに含まれる列はスキップし、その列のデータも削除対象にする
+            if header_name in EXCLUDED_HEADERS:
+                logger.info(f"除外された列: {header_name} (列{col_idx}) - データを削除します")
+                excluded_columns.append(col_idx)
+                # ヘッダーを空にする
+                cell.value = None
             else:
-                logger.info(f"除外された列: {header_name} (列{col_idx})")
+                header_materials[header_name] = col_idx
+    
+    # 除外された列のデータを全て空にする
+    if excluded_columns:
+        for row_idx in range(2, ws_standard.max_row + 1):
+            for col_idx in excluded_columns:
+                ws_standard.cell(row=row_idx, column=col_idx).value = None
+        logger.info(f"除外列のデータを削除しました: 列 {excluded_columns}")
     
     logger.info(f"ヘッダー材料: {list(header_materials.keys())}")
     
@@ -585,20 +673,30 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             next_row += 1
         
         # 各材料の価格を記入（既存の価格を上書き）
+        logger.info(f"    記入する材料: {list(prices.keys())}")
         for material_name, price_value in prices.items():
             # 材料名を正規化
             normalized_material = None
-            for key, value in MATERIAL_MAPPING.items():
-                if key in material_name or material_name in key:
-                    normalized_material = value
-                    break
+            
+            # 完全一致を優先
+            if material_name in MATERIAL_MAPPING:
+                normalized_material = MATERIAL_MAPPING[material_name]
+            else:
+                # 部分一致
+                for key, value in MATERIAL_MAPPING.items():
+                    if key == material_name or material_name == key:
+                        normalized_material = value
+                        break
+                    if key in material_name or material_name in key:
+                        normalized_material = value
+                        break
             
             if not normalized_material:
                 # 直接マッチを試す
                 if material_name in header_materials:
                     normalized_material = material_name
                 else:
-                    logger.debug(f"    未マッチ: {material_name}")
+                    logger.warning(f"    未マッチ材料: {material_name} (価格: {price_value})")
                     continue
             
             # 列番号を取得（全角スペースの違いを考慮）
@@ -618,7 +716,7 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
                             break
             
             if not col_idx:
-                logger.debug(f"    警告: {normalized_material}の列が見つかりません")
+                logger.warning(f"    列が見つからない: {normalized_material} (元: {material_name}, 価格: {price_value})")
                 continue
             
             # 価格を正規化
@@ -626,7 +724,9 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
             
             if normalized_price:
                 ws_standard.cell(row=row_idx, column=col_idx, value=normalized_price)
-                logger.info(f"    {normalized_material}: {normalized_price}円 (列{col_idx})")
+                logger.info(f"    ✓ {normalized_material}: {normalized_price}円 (列{col_idx})")
+            else:
+                logger.warning(f"    価格正規化失敗: {material_name} = {price_value}")
     
     # 罫線を追加
     thin_border = Border(

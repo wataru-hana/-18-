@@ -477,27 +477,28 @@ corrections:
   眞田鋼業株式会社:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 込真鍮, 上線(80%), 中線(65%), VA線,
     # アルミホイール, アルミサッシ（ビスなし）, アルミ缶, ステンレス（304）, バッテリー
+    # 正しい価格 (2025年12月更新)
     add:
     - material: ピカ銅
-      price: 1650円/kg
+      price: 1850円/kg
     - material: 並銅
-      price: 1600円/kg
+      price: 1780円/kg
     - material: 砲金
-      price: 1400円/kg
+      price: 1550円/kg
     - material: 真鍮
-      price: 1000円/kg
+      price: 1150円/kg
     - material: 雑線80%
-      price: 1220円/kg
+      price: 1350円/kg
     - material: 雑線60%-65%
-      price: 900円/kg
+      price: 1000円/kg
     - material: VA線
-      price: 700円/kg
+      price: 750円/kg
     - material: アルミホイール
-      price: 320円/kg
+      price: 390円/kg
     - material: アルミサッシ
-      price: 310円/kg
+      price: 360円/kg
     - material: アルミ缶
-      price: 300円/kg
+      price: 280円/kg
     - material: ステンレス304
       price: 160円/kg
     - material: 鉛バッテリー
