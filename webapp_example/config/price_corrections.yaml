@@ -150,8 +150,18 @@ corrections:
       material_new: SUS304（ステンレス上）
     - material: 雑線S（80%）
       material_new: 雑線80%
+    - material: 雑線S
+      material_new: 雑線80%
     - material: 雑線A（60%）
       material_new: 雑線60%-65%
+    - material: 雑線A
+      material_new: 雑60%-65%
+    - material: アルミ（上）
+      material_new: アルミサッシ
+    - material: ステンレス（上）
+      material_new: ステンレス304
+    - material: バッテリー（上）
+      material_new: 鉛バッテリー
   株式会社 春日商会　富山支店:
     remove:
     - 雑旋
@@ -345,6 +355,10 @@ corrections:
     # 材料名の統一のみ（価格は上書きしない）
     - material: 込銅
       material_new: 並銅
+    - material: 上線銅率80%
+      material_new: 雑線80%
+    - material: 上線銅率60%
+      material_new: 雑60%-65%
     - material: 上線
       material_new: 雑線80%
     - material: ねずみ線

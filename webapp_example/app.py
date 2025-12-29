@@ -812,12 +812,16 @@ def apply_price_corrections_single(result, correction):
                     print(f"WARNING: Failed to normalize price '{new_price}': {e}")
                     price_normalized = None
             
-            # 材料名の部分一致で検索
+            # 材料名の部分一致で検索（より具体的なマッチを優先）
             matched_material = None
+            best_match_length = 0
             for material_key in prices.keys():
                 if old_material in material_key or material_key in old_material:
-                    matched_material = material_key
-                    break
+                    # より長いマッチを優先（より具体的なマッピング）
+                    match_length = len(old_material) if old_material in material_key else len(material_key)
+                    if match_length > best_match_length:
+                        matched_material = material_key
+                        best_match_length = match_length
             
             if matched_material:
                 if new_material != old_material:

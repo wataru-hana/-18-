@@ -420,7 +420,8 @@ class Category2Scraper(BaseScraper):
                                         prices[material] = price
                             else:
                                 prices[material] = price
-                    break
+                    # break  # 同じボックス内に複数の価格がある場合（例：アルミ缶とプレス）、全てチェックする
+
         
         return prices
     

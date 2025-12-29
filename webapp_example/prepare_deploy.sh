@@ -33,3 +33,5 @@ echo "1. git add config scrapers"
 echo "2. git commit -m 'Add config and scrapers for deployment'"
 echo "3. git push"
 
+
+
