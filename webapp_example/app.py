@@ -220,7 +220,7 @@ def start_scraping():
                     if not isinstance(correction_config, dict):
                         print(f"WARNING: correction_config is not a dict for {company_name_normalized}: {type(correction_config)}")
                     else:
-                        result = apply_price_corrections_single(result, correction_config)
+                        result = apply_price_corrections_single(result, correction_config, company_name_normalized)
                 except Exception as e:
                     print(f"ERROR in apply_price_corrections_single for {company_name_normalized}: {e}")
                     import traceback
@@ -753,11 +753,40 @@ def normalize_price(price_str):
         return price_value
     return ''
 
-def apply_price_corrections_single(result, correction):
+def apply_special_price_rules(company_name, prices):
+    """特殊な価格計算ルールを適用
+    
+    金田商事: 表記価格は税別なので×1.1、アルミ缶は(表記価格+5)×1.1
+    """
+    if '金田商事' in company_name:
+        print(f"    特殊ルール適用: 金田商事（税込計算）")
+        new_prices = {}
+        for material, price_str in prices.items():
+            # 価格を数値に変換
+            price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', str(price_str))
+            if price_match:
+                price_value = float(price_match.group(1).replace(',', '').replace('，', ''))
+                
+                # アルミ缶は (表記価格+5) × 1.1
+                if 'アルミ缶' in material:
+                    new_price = int((price_value + 5) * 1.1)
+                    print(f"      {material}: {price_value} → ({price_value}+5)×1.1 = {new_price}")
+                else:
+                    # その他は × 1.1（税込）
+                    new_price = int(price_value * 1.1)
+                    print(f"      {material}: {price_value} → ×1.1 = {new_price}")
+                
+                new_prices[material] = str(new_price)
+            else:
+                new_prices[material] = price_str
+        return new_prices
+    
+    return prices
+
+def apply_price_corrections_single(result, correction, company_name=''):
     """単一の結果に価格修正を適用
     
-    処理順序: remove → modify → add
-    ※addを最後に適用することで、正しい価格が確実に設定される
+    処理順序: remove → modify → 特殊計算ルール
     """
     if not isinstance(result, dict):
         print(f"ERROR: result is not a dict: {type(result)}")
@@ -812,15 +841,8 @@ def apply_price_corrections_single(result, correction):
                 prices[new_material] = prices[matched_material]
                 del prices[matched_material]
     
-    # 3. add処理（正しい価格を追加・上書き - 最後に実行して確実に反映）
-    if 'add' in correction and isinstance(correction['add'], list):
-        for item in correction['add']:
-            if isinstance(item, dict) and 'material' in item and 'price' in item:
-                material_name = item['material']
-                price_value = item['price']
-                price_normalized = normalize_price(price_value)
-                if price_normalized:
-                    prices[material_name] = price_normalized
+    # 3. 特殊計算ルールを適用（金田商事の税込計算など）
+    prices = apply_special_price_rules(company_name, prices)
     
     result['prices'] = prices
     return result

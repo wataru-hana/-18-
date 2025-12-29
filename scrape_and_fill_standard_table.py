@@ -433,11 +433,40 @@ def load_price_corrections(config_path: str = 'config/price_corrections.yaml'):
         logger.warning(f"価格修正マッピングファイルの読み込みエラー: {str(e)}")
         return {}
 
+def apply_special_price_rules(company_name, prices):
+    """特殊な価格計算ルールを適用
+    
+    金田商事: 表記価格は税別なので×1.1、アルミ缶は(表記価格+5)×1.1
+    """
+    if '金田商事' in company_name:
+        logger.info(f"    特殊ルール適用: 金田商事（税込計算）")
+        new_prices = {}
+        for material, price_str in prices.items():
+            # 価格を数値に変換
+            price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', str(price_str))
+            if price_match:
+                price_value = float(price_match.group(1).replace(',', '').replace('，', ''))
+                
+                # アルミ缶は (表記価格+5) × 1.1
+                if 'アルミ缶' in material:
+                    new_price = int((price_value + 5) * 1.1)
+                    logger.info(f"      {material}: {price_value} → ({price_value}+5)×1.1 = {new_price}")
+                else:
+                    # その他は × 1.1（税込）
+                    new_price = int(price_value * 1.1)
+                    logger.info(f"      {material}: {price_value} → ×1.1 = {new_price}")
+                
+                new_prices[material] = f"{new_price}円/kg"
+            else:
+                new_prices[material] = price_str
+        return new_prices
+    
+    return prices
+
 def apply_price_corrections(results, corrections):
     """価格修正マッピングを適用
     
-    処理順序: remove → modify → add
-    ※addを最後に適用することで、正しい価格が確実に設定される
+    処理順序: remove → modify → 特殊計算ルール
     """
     corrected_results = []
     
@@ -472,7 +501,6 @@ def apply_price_corrections(results, corrections):
                         del prices[material]
             
             # 2. modify: 材料名の変換（マッピング）のみ行う
-            # ※価格の変更はaddで行う
             if 'modify' in correction:
                 for item in correction['modify']:
                     old_material = item['material']
@@ -483,17 +511,11 @@ def apply_price_corrections(results, corrections):
                         logger.info(f"    modify: {old_material} → {new_material}")
                         prices[new_material] = prices[old_material]
                         del prices[old_material]
-            
-            # 3. add: 正しい価格を追加・上書き（最後に実行して確実に反映）
-            if 'add' in correction:
-                logger.info(f"    add: {len(correction['add'])}件の価格を設定")
-                for item in correction['add']:
-                    material = item['material']
-                    price = item['price']
-                    prices[material] = price
-                    logger.info(f"      {material}: {price}")
         else:
             logger.warning(f"  価格修正なし（マッチする設定が見つからない）: {company_name}")
+        
+        # 3. 特殊計算ルールを適用（金田商事の税込計算など）
+        prices = apply_special_price_rules(company_name, prices)
         
         corrected_result = result.copy()
         corrected_result['prices'] = prices
