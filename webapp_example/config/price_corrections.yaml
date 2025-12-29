@@ -1,3 +1,14 @@
+# 価格修正マッピング設定
+# 
+# ※このファイルはマッピング情報のみを含みます
+# ※固定価格（add）は削除しました。スクレイピングで取得した価格がそのまま出力されます
+#
+# 各セクションの役割:
+# - remove: スクレイピング結果から削除する項目（取り扱いなしの場合）
+# - modify: サイト上の表記名 → 標準名に変換するマッピング
+#
+# ※特殊ルールが必要な会社（金田商事の税込計算など）は、スクレイパー側で対応
+
 corrections:
   有限会社　八尾アルミセンター:
     # サイト上の表記: ピカ線, 込銅, 砲金, 込真鍮(A), 電線80％, 電線60％,
@@ -7,29 +18,7 @@ corrections:
     - 雑旋
     - ステンレス304
     - 鉛バッテリー
-    add:
-    - material: ピカ銅
-      price: 1840円/kg
-    - material: 並銅
-      price: 1740円/kg
-    - material: 砲金
-      price: 1540円/kg
-    - material: 真鍮
-      price: 1140円/kg
-    - material: 雑線80%
-      price: 1380円/kg
-    - material: 雑線60%-65%
-      price: 960円/kg
-    - material: VA線
-      price: 750円/kg
-    - material: アルミホイール
-      price: 405円/kg
-    - material: アルミサッシ
-      price: 405円/kg
-    - material: アルミ缶
-      price: 340円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: ピカ線
       material_new: ピカ銅
     - material: 込銅
@@ -52,6 +41,7 @@ corrections:
       material_new: アルミサッシ
     - material: 缶プレス
       material_new: アルミ缶
+
   大畑商事（千葉・大阪）:
     # サイト上の表記: ピカ線(特一号銅線・ピカ線・1号銅), 並銅(なみどう), 砲金(青銅)_付物なし,
     # 真鍮/黄銅, 雑電線(銅率80%), 雑電線(銅率65%), VA線(VVFケーブル・雑電線),
@@ -59,33 +49,7 @@ corrections:
     # ステンレス(SUS304), 自動車用 鉛バッテリー
     remove:
     - 雑旋
-    add:
-    - material: ピカ銅
-      price: 1850円/kg
-    - material: 並銅
-      price: 1800円/kg
-    - material: 砲金
-      price: 1580円/kg
-    - material: 真鍮
-      price: 1140円/kg
-    - material: 雑線80%
-      price: 1350円/kg
-    - material: 雑線60%-65%
-      price: 1000円/kg
-    - material: VA線
-      price: 750円/kg
-    - material: アルミホイール
-      price: 370円/kg
-    - material: アルミサッシ
-      price: 340円/kg
-    - material: アルミ缶
-      price: 280円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: ピカ線
       material_new: ピカ銅
     - material: 真鍮/黄銅
@@ -102,26 +66,11 @@ corrections:
       material_new: ステンレス304
     - material: 自動車用 鉛バッテリー
       material_new: 鉛バッテリー
+
   株式会社 ヒラノヤ:
     # サイト上の表記: 並銅, 砲金, 真鍮, 銅線（80%以上）, 銅線（60%以上）, 
     # VA線(VVF・Fｹｰﾌﾞﾙ), アルミホイールA
-    add:
-    - material: 並銅
-      price: 1780円/kg
-    - material: 砲金
-      price: 1580円/kg
-    - material: 真鍮
-      price: 1140円/kg
-    - material: 雑線80%
-      price: 1300円/kg
-    - material: 雑線60%-65%
-      price: 1000円/kg
-    - material: VA線
-      price: 750円/kg
-    - material: アルミホイール
-      price: 380円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 銅線（80%以上）
       material_new: 雑線80%
     - material: 銅線（60%以上）
@@ -130,17 +79,17 @@ corrections:
       material_new: VA線
     - material: アルミホイールA
       material_new: アルミホイール
+
   木村金属（大阪）:
     # サイト上の表記: 並銅
+    # ※ステンレス304は取り扱いなし
     remove:
     - 雑旋
     - ステンレス304
-    add:
-    - material: 並銅
-      price: 1830円/kg
     modify:
     - material: 波銅
       material_new: 並銅
+
   株式会社鳳山:
     # サイト上の表記: ピカ線, 込銅, 砲金, 込真鍮, 一本線(A), 三本線(B), 雑線,
     # アルミホイール, アルミサッシ, ステンレス(SUS304), バッテリー
@@ -148,31 +97,7 @@ corrections:
     # ※この会社では「雑線」はVA線を指す
     remove:
     - アルミ缶
-    add:
-    - material: ピカ銅
-      price: 1892円/kg
-    - material: 並銅
-      price: 1793円/kg
-    - material: 砲金
-      price: 1628円/kg
-    - material: 真鍮
-      price: 1177円/kg
-    - material: 雑線80%
-      price: 1430円/kg
-    - material: 雑線60%-65%
-      price: 957円/kg
-    - material: VA線
-      price: 770円/kg
-    - material: アルミホイール
-      price: 396円/kg
-    - material: アルミサッシ
-      price: 385円/kg
-    - material: ステンレス304
-      price: 165円/kg
-    - material: 鉛バッテリー
-      price: 99円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: ピカ線
       material_new: ピカ銅
     - material: 込銅
@@ -189,37 +114,14 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   千福商会（大阪）:
     # サイト上の表記: ピカ線一号, 並銅, 砲金, 込真鍮, 銅線A（80%↑）, 銅線C（60%↑）, VA線,
     # アルミホイール, アルミサッシ上, ステンレス屑, カーバッテリー
     # ※アルミ缶は取り扱いなし
     remove:
     - アルミ缶
-    add:
-    - material: ピカ銅
-      price: 1820円/kg
-    - material: 並銅
-      price: 1720円/kg
-    - material: 砲金
-      price: 1580円/kg
-    - material: 真鍮
-      price: 1140円/kg
-    - material: 雑線80%
-      price: 1400円/kg
-    - material: 雑線60%-65%
-      price: 1000円/kg
-    - material: VA線
-      price: 720円/kg
-    - material: アルミホイール
-      price: 400円/kg
-    - material: アルミサッシ
-      price: 340円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: ピカ線一号
       material_new: ピカ銅
     - material: 込真鍮
@@ -236,37 +138,14 @@ corrections:
       material_new: ステンレス304
     - material: カーバッテリー
       material_new: 鉛バッテリー
+
   土金（大阪）:
     # サイト上の表記: 上銅, 並銅, 砲金, 真鍮（上）, 雑線S, 雑線A, VA線（巻き）,
     # アルミ（上）, アルミ缶（プレス）, ステンレス（上）, バッテリー（上）
     # ※アルミホイールは取り扱いなし
     remove:
     - アルミホイール
-    add:
-    - material: ピカ銅
-      price: 1920円/kg
-    - material: 並銅
-      price: 1830円/kg
-    - material: 砲金
-      price: 1620円/kg
-    - material: 真鍮
-      price: 1170円/kg
-    - material: 雑線80%
-      price: 1460円/kg
-    - material: 雑線60%-65%
-      price: 1110円/kg
-    - material: VA線
-      price: 790円/kg
-    - material: アルミサッシ
-      price: 390円/kg
-    - material: アルミ缶
-      price: 260円/kg
-    - material: ステンレス304
-      price: 180円/kg
-    - material: 鉛バッテリー
-      price: 100円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 上銅
       material_new: ピカ銅
     - material: 真鍮（上）
@@ -289,38 +168,12 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー（上）
       material_new: 鉛バッテリー
+
   株式会社 春日商会　富山支店:
     # サイト上の表記: 一宮本社と同じ
-    # 価格ルール: 一宮本社の単価 - 4円
     remove:
     - 雑旋
-    add:
-    - material: ピカ銅
-      price: 1846円/kg
-    - material: 並銅
-      price: 1796円/kg
-    - material: 砲金
-      price: 1616円/kg
-    - material: 真鍮
-      price: 1166円/kg
-    - material: 雑線80%
-      price: 1386円/kg
-    - material: 雑線60%-65%
-      price: 1026円/kg
-    - material: VA線
-      price: 781円/kg
-    - material: アルミホイール
-      price: 411円/kg
-    - material: アルミサッシ
-      price: 401円/kg
-    - material: アルミ缶
-      price: 321円/kg
-    - material: ステンレス304
-      price: 181円/kg
-    - material: 鉛バッテリー
-      price: 111円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 一本線 A
       material_new: 雑線80%
     - material: 一本線A
@@ -333,38 +186,12 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   株式会社 春日商会　滋賀支店:
     # サイト上の表記: 一宮本社と同じ
-    # 価格ルール: 一宮本社の単価 - 2円
     remove:
     - 雑旋
-    add:
-    - material: ピカ銅
-      price: 1848円/kg
-    - material: 並銅
-      price: 1798円/kg
-    - material: 砲金
-      price: 1618円/kg
-    - material: 真鍮
-      price: 1168円/kg
-    - material: 雑線80%
-      price: 1388円/kg
-    - material: 雑線60%-65%
-      price: 1028円/kg
-    - material: VA線
-      price: 783円/kg
-    - material: アルミホイール
-      price: 413円/kg
-    - material: アルミサッシ
-      price: 403円/kg
-    - material: アルミ缶
-      price: 323円/kg
-    - material: ステンレス304
-      price: 183円/kg
-    - material: 鉛バッテリー
-      price: 113円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 一本線 A
       material_new: 雑線80%
     - material: 一本線A
@@ -377,38 +204,13 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   株式会社 春日商会　一宮本社:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 一本線 A（銅率80％から）, 三本線 A（銅率65％から）,
     # VA線, アルミホイール, アルミサッシ, アルミ缶, ステンレス, バッテリー
     remove:
     - 雑旋
-    add:
-    - material: ピカ銅
-      price: 1850円/kg
-    - material: 並銅
-      price: 1800円/kg
-    - material: 砲金
-      price: 1620円/kg
-    - material: 真鍮
-      price: 1170円/kg
-    - material: 雑線80%
-      price: 1390円/kg
-    - material: 雑線60%-65%
-      price: 1030円/kg
-    - material: VA線
-      price: 785円/kg
-    - material: アルミホイール
-      price: 415円/kg
-    - material: アルミサッシ
-      price: 405円/kg
-    - material: アルミ缶
-      price: 325円/kg
-    - material: ステンレス304
-      price: 185円/kg
-    - material: 鉛バッテリー
-      price: 115円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 一本線 A
       material_new: 雑線80%
     - material: 一本線A
@@ -421,6 +223,7 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   東北キング:
     # サイト上の表記: ピカ銅, 並銅, 砲金コロ, 込真鍮, 上線（80％）, 上線（60％）SV,
     # アルミホイール, アルミ（63S）, ステンレス（304系）, 車バッテリー
@@ -430,29 +233,7 @@ corrections:
     - 雑旋
     - VA線
     - アルミ缶
-    add:
-    - material: ピカ銅
-      price: 1931円/kg
-    - material: 並銅
-      price: 1832円/kg
-    - material: 砲金
-      price: 1683円/kg
-    - material: 真鍮
-      price: 1188円/kg
-    - material: 雑線80%
-      price: 1458円/kg
-    - material: 雑線60%-65%
-      price: 1067円/kg
-    - material: アルミホイール
-      price: 418円/kg
-    - material: アルミサッシ
-      price: 397円/kg
-    - material: ステンレス304
-      price: 150円/kg
-    - material: 鉛バッテリー
-      price: 77円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 砲金コロ
       material_new: 砲金
     - material: 込真鍮
@@ -471,36 +252,11 @@ corrections:
       material_new: ステンレス304
     - material: 車バッテリー
       material_new: 鉛バッテリー
+
   眞田鋼業株式会社:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 込真鍮, 上線(80%), 中線(65%), VA線,
     # アルミホイール, アルミサッシ（ビスなし）, アルミ缶, ステンレス（304）, バッテリー
-    add:
-    - material: ピカ銅
-      price: 1650円/kg
-    - material: 並銅
-      price: 1600円/kg
-    - material: 砲金
-      price: 1400円/kg
-    - material: 真鍮
-      price: 1000円/kg
-    - material: 雑線80%
-      price: 1220円/kg
-    - material: 雑線60%-65%
-      price: 900円/kg
-    - material: VA線
-      price: 700円/kg
-    - material: アルミホイール
-      price: 320円/kg
-    - material: アルミサッシ
-      price: 310円/kg
-    - material: アルミ缶
-      price: 300円/kg
-    - material: ステンレス304
-      price: 160円/kg
-    - material: 鉛バッテリー
-      price: 90円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 込真鍮
       material_new: 真鍮
     - material: 上線(80%)
@@ -513,36 +269,11 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   明鑫貿易株式会社:
     # サイト上の表記: ピカ線, 並銅, 砲金, 込真鍮, 一本線(A), 三本線（A）, VA線,
     # ｱﾙﾐﾎｲｰﾙ付きなし, ｱﾙﾐｻｯｼ(63S), 缶プレス, ステン304, 自動車バッテリー
-    add:
-    - material: ピカ銅
-      price: 1840円/kg
-    - material: 並銅
-      price: 1780円/kg
-    - material: 砲金
-      price: 1580円/kg
-    - material: 真鍮
-      price: 1150円/kg
-    - material: 雑線80%
-      price: 1370円/kg
-    - material: 雑線60%-65%
-      price: 1000円/kg
-    - material: VA線
-      price: 770円/kg
-    - material: アルミホイール
-      price: 400円/kg
-    - material: アルミサッシ
-      price: 380円/kg
-    - material: アルミ缶
-      price: 280円/kg
-    - material: ステンレス304
-      price: 150円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: ピカ線
       material_new: ピカ銅
     - material: 込真鍮
@@ -563,37 +294,14 @@ corrections:
       material_new: ステンレス304
     - material: 自動車バッテリー
       material_new: 鉛バッテリー
+
   東起産業（株）:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮A, 一本線80%, 三本線65%, VA線,
     # アルミホイール, アルミサッシA 付物なし, ステンレス, 自動車バッテリー
     # ※アルミ缶は取り扱いなし
     remove:
     - アルミ缶
-    add:
-    - material: ピカ銅
-      price: 1900円/kg
-    - material: 並銅
-      price: 1850円/kg
-    - material: 砲金
-      price: 1600円/kg
-    - material: 真鍮
-      price: 1180円/kg
-    - material: 雑線80%
-      price: 1300円/kg
-    - material: 雑線60%-65%
-      price: 950円/kg
-    - material: VA線
-      price: 750円/kg
-    - material: アルミホイール
-      price: 400円/kg
-    - material: アルミサッシ
-      price: 400円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 真鍮A
       material_new: 真鍮
     - material: 一本線80%
@@ -606,6 +314,7 @@ corrections:
       material_new: 鉛バッテリー
     - material: ステンレス
       material_new: ステンレス304
+
   鴻祥貿易株式会社:
     # サイト上の表記: ピカ銅（特一号銅線・ピカ線）, 込銅（真鍮なし）, 真鍮A,
     # 上線 銅率80%, 上線 銅率60%, ねずみ線, アルミホイール, アルミサッシA,
@@ -613,31 +322,7 @@ corrections:
     # ※砲金は取り扱いなし
     remove:
     - 砲金
-    add:
-    - material: ピカ銅
-      price: 1860円/kg
-    - material: 並銅
-      price: 1780円/kg
-    - material: 真鍮
-      price: 1580円/kg
-    - material: 雑線80%
-      price: 1380円/kg
-    - material: 雑線60%-65%
-      price: 1020円/kg
-    - material: VA線
-      price: 770円/kg
-    - material: アルミホイール
-      price: 400円/kg
-    - material: アルミサッシ
-      price: 370円/kg
-    - material: アルミ缶
-      price: 300円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 110円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 込銅（真鍮なし）
       material_new: 並銅
     - material: 込銅
@@ -662,37 +347,12 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
+
   安城貿易（愛知）:
     # サイト上の表記: ピカ銅, 並銅, 砲金（水道ﾒｰﾀｰ・異物無）, 真鍮（異物なし）,
     # 一本線80%, 三本線60～65%, VA線, アルミホイル（異物無／有）,
     # アルミサッシ, アルミ缶プレス, ステンレス, バッテリー
-    add:
-    - material: ピカ銅
-      price: 1780円/kg
-    - material: 並銅
-      price: 1730円/kg
-    - material: 砲金
-      price: 1550円/kg
-    - material: 真鍮
-      price: 1120円/kg
-    - material: 雑線80%
-      price: 1320円/kg
-    - material: 雑線60%-65%
-      price: 920円/kg
-    - material: VA線
-      price: 750円/kg
-    - material: アルミホイール
-      price: 405円/kg
-    - material: アルミサッシ
-      price: 370円/kg
-    - material: アルミ缶
-      price: 260円/kg
-    - material: ステンレス304
-      price: 170円/kg
-    - material: 鉛バッテリー
-      price: 105円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 砲金（水道ﾒｰﾀｰ・異物無）
       material_new: 砲金
     - material: 真鍮（異物なし）
@@ -711,12 +371,7 @@ corrections:
       material_new: ステンレス304
     - material: バッテリー
       material_new: 鉛バッテリー
-    - material: アルミサッシ
-      price: '350'
-    - material: アルミ缶
-      price: '260'
-    - material: ステンレス304
-      price: '170'
+
   株式会社八木:
     # サイト上の表記: 一号銅線（ピカ線）, 並銅, 砲金, 真鍮・込真鍮, 80%線, 60%線,
     # VA線(巻物), アルミサッシ, ステンレス(SUS304)
@@ -726,27 +381,7 @@ corrections:
     - アルミホイール
     - アルミ缶
     - 鉛バッテリー
-    add:
-    - material: ピカ銅
-      price: 1910円/kg
-    - material: 並銅
-      price: 1770円/kg
-    - material: 砲金
-      price: 1530円/kg
-    - material: 真鍮
-      price: 1160円/kg
-    - material: 雑線80%
-      price: 1430円/kg
-    - material: 雑線60%-65%
-      price: 1040円/kg
-    - material: VA線
-      price: 780円/kg
-    - material: アルミサッシ
-      price: 380円/kg
-    - material: ステンレス304
-      price: 170円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 一号銅線（ピカ線）
       material_new: ピカ銅
     - material: 一号銅線(ピカ線)
@@ -765,35 +400,15 @@ corrections:
       material_new: ステンレス304
     - material: ステンレス（SUS304）
       material_new: ステンレス304
+
   有限会社金田商事:
-    # 個別ルール:
-    # ①表記価格は税別なので、1.1をかけて税込として出力
-    # ②アルミ缶は、(表記価格+5) × 1.1 = 最終価格
+    # ※特殊ルール: 表記価格は税別なので、スクレイパー側で1.1をかけて税込として出力
+    # ※アルミ缶は、(表記価格+5) × 1.1 = 最終価格
     # サイト上の表記: 1号銅線(ピカ線), 銅(並)銅管, 砲金B(青銅鋳物), 真鍮(上)A(他金属 無),
     # アルミホイール, アルミサッシA63S(付物無し), アルミ缶(バラ), ステンレス18-8A(SUS304屑), 鉛バッテリー
     remove:
     - 雑旋
-    add:
-    - material: ピカ銅
-      price: 1914円/kg
-    - material: 並銅
-      price: 1804円/kg
-    - material: 砲金
-      price: 1569円/kg
-    - material: 真鍮
-      price: 1236円/kg
-    - material: アルミホイール
-      price: 368円/kg
-    - material: アルミサッシ
-      price: 368円/kg
-    - material: アルミ缶
-      price: 302円/kg
-    - material: ステンレス304
-      price: 176円/kg
-    - material: 鉛バッテリー
-      price: 94円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 1号銅線(ピカ線)
       material_new: ピカ銅
     - material: 銅(並)銅管
@@ -814,20 +429,11 @@ corrections:
       material_new: ステンレス304
     - material: ステンレス18-8A
       material_new: ステンレス304
+
   鴻陽産業株式会社 岐阜工場:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 電線A・80％, 電線C・60％,
     # VA線, アルミホイール, アルミサッシ, アルミ缶, ステンレス, バッテリーA
-    add:
-    - material: 雑線80%
-      price: 1460円/kg
-    - material: 雑線60%-65%
-      price: 1040円/kg
-    - material: ステンレス304
-      price: 160円/kg
-    - material: 鉛バッテリー
-      price: 80円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 電線A・80％
       material_new: 雑線80%
     - material: 電線A・80%
@@ -840,21 +446,11 @@ corrections:
       material_new: ステンレス304
     - material: バッテリーA
       material_new: 鉛バッテリー
+
   株式会社 大垣金属:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 電線A（８０％以上）, 三本線A（60％）,
     # VA線, アルミホイール, アルミサッシ, アルミ缶, ステンレス, カーバッテリー
-    # ※間違いがあった項目のみ価格修正
-    add:
-    - material: 雑線80%
-      price: 1460円/kg
-    - material: 雑線60%-65%
-      price: 1040円/kg
-    - material: VA線
-      price: 780円/kg
-    - material: ステンレス304
-      price: 160円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 電線A（８０％以上）
       material_new: 雑線80%
     - material: 電線A（80％以上）
@@ -869,18 +465,10 @@ corrections:
       material_new: ステンレス304
     - material: カーバッテリー
       material_new: 鉛バッテリー
+
   高橋商事株式会社:
     # サイト上の表記: 三本線（銅率65%）, VA線, ステンレス 等
-    # ※自動取得できていなかった項目・間違っていた項目を修正
-    add:
-    - material: 雑線60%-65%
-      price: 1160円/kg
-    - material: VA線
-      price: 790円/kg
-    - material: ステンレス304
-      price: 175円/kg
     modify:
-    # サイト上の表記 → 標準アイテム名
     - material: 三本線（銅率65%）
       material_new: 雑線60%-65%
     - material: 三本線（銅率65％）
