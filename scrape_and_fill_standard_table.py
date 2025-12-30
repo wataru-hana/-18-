@@ -50,6 +50,8 @@ IMPLEMENTED_COMPANIES = {
 }
 
 # 材料名のマッピング（取得した材料名 → 正規の表の列名）
+# 注意: スクレイピング結果に「UP」「税込」などの接頭辞が付くことがあるため、
+#       normalize_material_name関数で事前にクリーンアップする
 MATERIAL_MAPPING = {
     'ピカ銅': 'ピカ銅',
     'ピカ線': 'ピカ銅',
@@ -132,6 +134,7 @@ MATERIAL_MAPPING = {
     '雑線S（80%）': '雑線80%',
     '銅線（80%以上）': '雑線80%',
     '銅線(80%以上)': '雑線80%',
+    '電線A・80': '雑線80%',  # 鴻陽産業
     
     '雑線60%': '雑線60%-65%',
     '雑線65%': '雑線60%-65%',
@@ -143,6 +146,7 @@ MATERIAL_MAPPING = {
     '電線60％': '雑線60%-65%',
     '電線C・60％': '雑線60%-65%',
     '電線C・60%': '雑線60%-65%',
+    '電線C・60': '雑線60%-65%',  # 鴻陽産業
     '電線65%': '雑線60%-65%',
     '銅率60%': '雑線60%-65%',
     '銅率65%': '雑線60%-65%',
@@ -219,17 +223,25 @@ MATERIAL_MAPPING = {
     'アルミ(63S)': 'アルミサッシ',
     'アルミサッシビス付': 'アルミサッシ',
     
+    # アルミ缶（バラ・プレス統合）
     'アルミ缶': 'アルミ缶',
     'アルミ缶バラ': 'アルミ缶',
-    'アルミ缶プレス': 'アルミ缶',
-    'アルミ缶(プレス)': 'アルミ缶',
     'アルミ缶(バラ)': 'アルミ缶',
     'アルミ缶（バラ）': 'アルミ缶',
-    'アルミ缶（プレス）': 'アルミ缶',
+    'アルミ缶（飲料缶）': 'アルミ缶',
+    'アルミ缶（飲料缶・UBC）': 'アルミ缶',
+    'アルミ缶(飲料缶)': 'アルミ缶',
     '缶バラ': 'アルミ缶',
+    'バラ缶': 'アルミ缶',
+    'バラアルミ缶': 'アルミ缶',
+    'アルミ缶プレス': 'アルミ缶',
+    'アルミ缶(プレス)': 'アルミ缶',
+    'アルミ缶（プレス）': 'アルミ缶',
     '缶プレス': 'アルミ缶',
     'アルミプレス': 'アルミ缶',
-    'バラ缶': 'アルミ缶',
+    'プレス缶': 'アルミ缶',
+    'アルミ缶(飲料缶・UBC) プレス物': 'アルミ缶',
+    'アルミ缶（飲料缶・UBC）プレス物': 'アルミ缶',
     
     'SUS304': 'ステンレス304',
     'ステンレス304': 'ステンレス304',
@@ -354,6 +366,45 @@ def normalize_price(price_str):
         return price_value
     return ''
 
+def normalize_material_name(material_name):
+    """材料名を正規化（不要な接頭辞を削除）
+    
+    スクレイピング結果に含まれる「UP」「税込」「鉄くず系PC基板系」などの
+    ゴミ文字を削除して、正しい材料名を抽出する
+    """
+    if not material_name:
+        return ''
+    
+    name = str(material_name).strip()
+    
+    # 不要な接頭辞パターンを削除
+    # 例: "UPピカ銅" → "ピカ銅"
+    # 例: "税込UP上銅" → "上銅"
+    # 例: "鉄くず系PC基板系UP砲金" → "砲金"
+    prefixes_to_remove = [
+        r'^.*?鉄くず系PC基板系',
+        r'^.*?くず系PC基板系',
+        r'^.*?系PC基板系',
+        r'^.*?PC基板系',
+        r'^.*?トランス系',
+        r'^.*?ランス系',
+        r'^.*?ンス系',
+        r'^.*?ス系',
+        r'^.*?タートランス系',
+        r'^税込UP',
+        r'^本税込UP',
+        r'^税込',
+        r'^UP',
+    ]
+    
+    for pattern in prefixes_to_remove:
+        name = re.sub(pattern, '', name)
+    
+    # 再度トリム
+    name = name.strip()
+    
+    return name if name else material_name
+
 def load_site_config(config_path: str = 'config/sites.yaml'):
     """サイト設定ファイルを読み込む"""
     try:
@@ -466,13 +517,21 @@ def apply_special_price_rules(company_name, prices):
 def apply_price_corrections(results, corrections):
     """価格修正マッピングを適用
     
-    処理順序: remove → modify → 特殊計算ルール
+    処理順序: 
+    1. 材料名の正規化（プレフィックス除去）
+    2. remove → modify → 特殊計算ルール
     """
     corrected_results = []
     
     for result in results:
         company_name = result.get('company_name', '')
-        prices = result.get('prices', {}).copy()
+        raw_prices = result.get('prices', {}).copy()
+        
+        # 最初に材料名を正規化（重複キーは後勝ち）
+        prices = {}
+        for material, price in raw_prices.items():
+            normalized = normalize_material_name(material)
+            prices[normalized] = price
         
         # 企業名のマッチングを柔軟に
         matched_correction_key = None
@@ -596,7 +655,7 @@ def scrape_implemented_companies():
     if price_corrections:
         logger.info("価格修正マッピングを適用中...")
         company_results = apply_price_corrections(company_results, price_corrections)
-    
+        
     return company_results
 
 def fill_standard_table(excel_file, company_results, target_sheet_name='正規の表'):
@@ -638,32 +697,44 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
     ws_standard = wb[actual_sheet_name]
     logger.info(f"シート「{actual_sheet_name}」を読み込みました")
     
-    # ヘッダー行を取得
-    header_row = [ws_standard.cell(row=1, column=col) for col in range(1, ws_standard.max_column + 1)]
+    def normalize_header_name(value: str) -> str:
+        if not value:
+            return ''
+        name = str(value).strip()
+        if name in {'アルミ缶　バラ', 'アルミ缶バラ', 'バラアルミ缶'}:
+            return 'アルミ缶'
+        return name
+
+    # 除外するヘッダー名（旧フォーマットの列）
+    EXCLUDED_HEADERS = {'アルミ缶プレス', 'アルミ缶　プレス'}
+
     header_materials = {}
-    
-    # 除外するヘッダー名（統合により不要になった列）
-    EXCLUDED_HEADERS = {'バラアルミ缶', 'アルミ缶バラ', 'アルミ缶プレス'}
-    excluded_columns = []  # 除外する列番号を記録
-    
+    header_row = [ws_standard.cell(row=1, column=col) for col in range(1, ws_standard.max_column + 1)]
+    columns_to_remove = []
+
     for col_idx, cell in enumerate(header_row, 1):
-        if cell.value:
-            header_name = str(cell.value).strip()
-            # 除外リストに含まれる列はスキップし、その列のデータも削除対象にする
-            if header_name in EXCLUDED_HEADERS:
-                logger.info(f"除外された列: {header_name} (列{col_idx}) - データを削除します")
-                excluded_columns.append(col_idx)
-                # ヘッダーを空にする
-                cell.value = None
-            else:
-                header_materials[header_name] = col_idx
-    
-    # 除外された列のデータを全て空にする
-    if excluded_columns:
-        for row_idx in range(2, ws_standard.max_row + 1):
-            for col_idx in excluded_columns:
-                ws_standard.cell(row=row_idx, column=col_idx).value = None
-        logger.info(f"除外列のデータを削除しました: 列 {excluded_columns}")
+        header_name = normalize_header_name(cell.value)
+        if header_name == 'アルミ缶':
+            cell.value = 'アルミ缶'
+
+        if header_name in EXCLUDED_HEADERS:
+            columns_to_remove.append(col_idx)
+            logger.info(f"旧アルミ缶列を削除予定: {cell.value} (列{col_idx})")
+
+    if columns_to_remove:
+        for col_idx in sorted(columns_to_remove, reverse=True):
+            ws_standard.delete_cols(col_idx)
+        logger.info(f"旧アルミ缶列を削除しました: 列 {columns_to_remove}")
+
+    # 再度ヘッダー情報を構築
+    header_materials = {}
+    for col_idx, cell in enumerate(ws_standard[1], 1):
+        header_name = normalize_header_name(cell.value)
+        if not header_name:
+            continue
+        if header_name == 'アルミ缶':
+            cell.value = 'アルミ缶'
+        header_materials[header_name] = col_idx
     
     logger.info(f"ヘッダー材料: {list(header_materials.keys())}")
     
@@ -712,19 +783,24 @@ def fill_standard_table(excel_file, company_results, target_sheet_name='正規�
         # 各材料の価格を記入（既存の価格を上書き）
         logger.info(f"    記入する材料: {list(prices.keys())}")
         for material_name, price_value in prices.items():
-            # 材料名を正規化
+            # 材料名を正規化（「UP」「税込」などの接頭辞を削除）
+            clean_material = normalize_material_name(material_name)
+            
+            # MATERIAL_MAPPINGで標準名を取得
             normalized_material = None
             
-            # 完全一致を優先
-            if material_name in MATERIAL_MAPPING:
+            # 完全一致を優先（クリーンな名前で）
+            if clean_material in MATERIAL_MAPPING:
+                normalized_material = MATERIAL_MAPPING[clean_material]
+            elif material_name in MATERIAL_MAPPING:
                 normalized_material = MATERIAL_MAPPING[material_name]
             else:
-                # 部分一致
+                # 部分一致（クリーンな名前で）
                 for key, value in MATERIAL_MAPPING.items():
-                    if key == material_name or material_name == key:
+                    if key == clean_material or clean_material == key:
                         normalized_material = value
                         break
-                    if key in material_name or material_name in key:
+                    if key in clean_material or clean_material in key:
                         normalized_material = value
                         break
             
@@ -863,11 +939,6 @@ if __name__ == '__main__':
         fill_standard_table(excel_file, company_results, '正規の表')
     
     logger.info("\n完了しました！")
-
-
-
-
-
 
 
 
