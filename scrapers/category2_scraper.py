@@ -110,6 +110,10 @@ class Category2Scraper(BaseScraper):
         有限会社金田商事用のfigcaption抽出
         figure > figcaption > div.span_9 > strongタグ構造
         特別処理: 税込変換、最高価格のみ抽出
+        
+        注意: 税込変換は金田商事専用。メインスクリプトのapply_special_price_rulesでも
+        処理されるため、二重変換にならないようにここでは素の価格を返す。
+        税込変換はapply_special_price_rulesで一括処理。
         """
         prices = {}
         
@@ -126,58 +130,53 @@ class Category2Scraper(BaseScraper):
             if not span_9:
                 continue
             
-            # 材料名を取得（最初のstrongタグ）
-            material_strongs = span_9.find_all('strong')
-            if not material_strongs:
+            # 材料名を取得
+            # strongタグの内容を取得し、<br/>タグで分割
+            first_strong = span_9.find('strong')
+            if not first_strong:
                 continue
             
-            material = material_strongs[0].get_text(strip=True)
+            # <br/>タグで分割して最初の行を材料名として取得
+            # strongタグのHTMLを取得して<br>で分割
+            strong_html = str(first_strong)
+            # <br/>または<br>で分割
+            parts = re.split(r'<br\s*/?>', strong_html)
+            if parts:
+                # 最初の部分からタグを除去して材料名を取得
+                material_soup = BeautifulSoup(parts[0], 'html.parser')
+                material = material_soup.get_text(strip=True)
+            else:
+                material = first_strong.get_text(strip=True)
+            
             # 「▲」などの記号を除去
             material = re.sub(r'^[▲△■□●○★☆]+', '', material).strip()
             
-            # 価格情報を取得（2番目のstrongタグまたは「単価：」を含むstrongタグ）
-            for strong in material_strongs:
-                text = strong.get_text(strip=True)
+            # 「単価」以降を削除（材料名に混入している場合）
+            material = re.sub(r'単価[：:].*$', '', material).strip()
+            
+            # 材料名が空または短すぎる場合はスキップ
+            if not material or len(material) < 2:
+                continue
+            
+            # 価格情報を取得（全strongタグのテキストから）
+            full_text = span_9.get_text(strip=True)
+            
+            # 価格パターンを探す（「単価：数字円」または「数字円/kg」）
+            # 範囲表記（1,562～1,577円/kg超など）に対応
+            price_matches = re.findall(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)\s*(?:円|¥)', full_text)
+            
+            if price_matches:
+                # 最高価格を取得（範囲表記の場合）
+                try:
+                    prices_numeric = [float(p.replace(',', '').replace('，', '')) for p in price_matches]
+                    max_price = max(prices_numeric)
+                    # ここでは税込変換しない（apply_special_price_rulesで処理）
+                    price = f"{int(max_price)}円/kg"
+                except ValueError:
+                    price = price_matches[0] + '円/kg'
                 
-                # 「単価：」を含むstrongタグから価格を抽出
-                if '単価' in text or '円' in text:
-                    # 価格パターンを探す
-                    price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)\s*[円¥]', text)
-                    if price_match:
-                        price_text = price_match.group(1)
-                        
-                        # 範囲表記（最低価格〜最高価格）の場合は最高価格のみを取得
-                        if '〜' in text or '～' in text or '-' in text or '超' in text:
-                            # 最高価格を探す
-                            price_matches = re.findall(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', text)
-                            if len(price_matches) >= 2:
-                                try:
-                                    max_price = max([float(p.replace(',', '').replace('，', '')) for p in price_matches])
-                                    # 税抜価格を税込価格に変換（消費税10%）
-                                    price_with_tax = int(max_price * 1.1)
-                                    price = f"{price_with_tax}円/kg"
-                                except ValueError:
-                                    price = price_text + '円/kg'
-                            else:
-                                # 単一価格の場合も税込変換
-                                try:
-                                    price_value = float(price_text.replace(',', '').replace('，', ''))
-                                    price_with_tax = int(price_value * 1.1)
-                                    price = f"{price_with_tax}円/kg"
-                                except ValueError:
-                                    price = price_text + '円/kg'
-                        else:
-                            # 単一価格の場合、税抜価格を税込価格に変換（消費税10%）
-                            try:
-                                price_value = float(price_text.replace(',', '').replace('，', ''))
-                                price_with_tax = int(price_value * 1.1)
-                                price = f"{price_with_tax}円/kg"
-                            except ValueError:
-                                price = price_text + '円/kg'
-                        
-                        if material and price:
-                            prices[material] = price
-                        break
+                if material and price:
+                    prices[material] = price
         
         return prices
     
