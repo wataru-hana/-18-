@@ -40,7 +40,7 @@ corrections:
     - material: サッシ新
       material_new: アルミサッシ
     - material: 缶プレス
-      material_new: アルミ缶
+      material_new: アルミ缶　プレス
 
   大畑商事（千葉・大阪）:
     # サイト上の表記: ピカ線(特一号銅線・ピカ線・1号銅), 並銅(なみどう), 砲金(青銅)_付物なし,
@@ -96,7 +96,8 @@ corrections:
     # ※アルミ缶は取り扱いなし
     # ※この会社では「雑線」はVA線を指す
     remove:
-    - アルミ缶
+    - アルミ缶　バラ
+    - アルミ缶　プレス
     modify:
     - material: ピカ線
       material_new: ピカ銅
@@ -120,7 +121,8 @@ corrections:
     # アルミホイール, アルミサッシ上, ステンレス屑, カーバッテリー
     # ※アルミ缶は取り扱いなし
     remove:
-    - アルミ缶
+    - アルミ缶　バラ
+    - アルミ缶　プレス
     modify:
     - material: ピカ線一号
       material_new: ピカ銅
@@ -163,7 +165,7 @@ corrections:
     - material: アルミ（上）
       material_new: アルミサッシ
     - material: アルミ缶（プレス）
-      material_new: アルミ缶
+      material_new: アルミ缶　プレス
     - material: ステンレス（上）
       material_new: ステンレス304
     - material: バッテリー（上）
@@ -232,7 +234,8 @@ corrections:
     remove:
     - 雑旋
     - VA線
-    - アルミ缶
+    - アルミ缶　バラ
+    - アルミ缶　プレス
     modify:
     - material: 砲金コロ
       material_new: 砲金
@@ -289,7 +292,7 @@ corrections:
     - material: ｱﾙﾐｻｯｼ(63S)
       material_new: アルミサッシ
     - material: 缶プレス
-      material_new: アルミ缶
+      material_new: アルミ缶　プレス
     - material: ステン304
       material_new: ステンレス304
     - material: 自動車バッテリー
@@ -300,7 +303,8 @@ corrections:
     # アルミホイール, アルミサッシA 付物なし, ステンレス, 自動車バッテリー
     # ※アルミ缶は取り扱いなし
     remove:
-    - アルミ缶
+    - アルミ缶　バラ
+    - アルミ缶　プレス
     modify:
     - material: 真鍮A
       material_new: 真鍮
@@ -366,7 +370,7 @@ corrections:
     - material: アルミホイル（異物無／有）
       material_new: アルミホイール
     - material: アルミ缶プレス
-      material_new: アルミ缶
+      material_new: アルミ缶　プレス
     - material: ステンレス
       material_new: ステンレス304
     - material: バッテリー
@@ -379,7 +383,8 @@ corrections:
     remove:
     - 雑旋
     - アルミホイール
-    - アルミ缶
+    - アルミ缶　バラ
+    - アルミ缶　プレス
     - 鉛バッテリー
     modify:
     - material: 一号銅線（ピカ線）
@@ -424,28 +429,37 @@ corrections:
     - material: アルミサッシA63S
       material_new: アルミサッシ
     - material: アルミ缶(バラ)
-      material_new: アルミ缶
+      material_new: アルミ缶　バラ
     - material: ステンレス18-8A(SUS304屑)
       material_new: ステンレス304
     - material: ステンレス18-8A
       material_new: ステンレス304
 
   鴻陽産業株式会社 岐阜工場:
-    # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 電線A・80％, 電線C・60％,
+    # サイト上の表記: ピカ銅, 上銅, 砲金, 真鍮, 電線A・80％, 電線C・60％,
     # VA線, アルミホイール, アルミサッシ, アルミ缶, ステンレス, バッテリーA
+    # ※「上銅」は並銅に相当
     modify:
+    - material: 上銅
+      material_new: 並銅
     - material: 電線A・80％
       material_new: 雑線80%
     - material: 電線A・80%
+      material_new: 雑線80%
+    - material: 電線A・80
       material_new: 雑線80%
     - material: 電線C・60％
       material_new: 雑線60%-65%
     - material: 電線C・60%
       material_new: 雑線60%-65%
+    - material: 電線C・60
+      material_new: 雑線60%-65%
     - material: ステンレス
       material_new: ステンレス304
     - material: バッテリーA
       material_new: 鉛バッテリー
+    - material: アルミ缶
+      material_new: アルミ缶　バラ
 
   株式会社 大垣金属:
     # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 電線A（８０％以上）, 三本線A（60％）,

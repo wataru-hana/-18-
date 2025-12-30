@@ -235,12 +235,13 @@ sites:
 - category: 2
   extractor_type: auto
   name: 鴻陽産業株式会社 岐阜工場
-  price_url: https://www.soou-kinzoku.com/item/index/1
+  price_url: https://www.soou-kinzoku.com/item/index/7
   price_urls:
+  # ステンレスページを最初に処理（タイトルに「ステンレス」を含む銅ページより先）
+  - https://www.soou-kinzoku.com/item/index/7
   - https://www.soou-kinzoku.com/item/index/1
   - https://www.soou-kinzoku.com/item/index/5
   - https://www.soou-kinzoku.com/item/index/6
-  - https://www.soou-kinzoku.com/item/index/7
   - https://www.soou-kinzoku.com/item/index/2
   - https://www.soou-kinzoku.com/item/index/8
   region: 岐阜
