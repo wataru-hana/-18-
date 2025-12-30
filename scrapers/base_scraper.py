@@ -124,40 +124,54 @@ class BaseScraper:
         
         filtered_prices = {}
         
+        # 全角数字を半角に変換するヘルパー関数
+        def normalize_numbers(text):
+            return text.translate(str.maketrans('０１２３４５６７８９', '0123456789'))
+        
         for material, price in prices.items():
-            material_lower = material.lower()
+            # 材料名を正規化（全角数字を半角に変換）
+            material_normalized = normalize_numbers(material)
+            material_lower = material_normalized.lower()
             
             # 70%線を除外（70%線は対象外）
-            if '70%' in material or '70％' in material or '70%線' in material or '70％線' in material:
+            if '70%' in material_normalized or '70％' in material_normalized or '70%線' in material_normalized or '70％線' in material_normalized:
                 continue
             
             # 括弧内の文字を除去した材料名を作成（マッチング用）
-            material_without_brackets = re.sub(r'[（(].*?[）)]', '', material)
+            material_without_brackets = re.sub(r'[（(].*?[）)]', '', material_normalized)
             material_without_brackets_lower = material_without_brackets.lower()
             
-            # 各対象アイテムのキーワードと照合
+            # 各材料に対して、すべての対象アイテムとのマッチを収集して、最も具体的なマッチを選択
+            best_match = None
+            best_match_score = -1
+            
             for target_item in target_items_config:
                 keywords = target_item.get('keywords', [])
                 target_name = target_item.get('name', '')
                 
-                # 既にマッチしている場合はスキップ
+                # 既にフィルタリング済みの場合はスキップ
                 if target_name in filtered_prices:
                     continue
                 
+                # キーワードを長さの降順でソート（より具体的なキーワードを優先）
+                keywords_sorted = sorted(keywords, key=len, reverse=True)
+                
                 # 材料名にキーワードが含まれているか確認
-                for keyword in keywords:
-                    keyword_lower = keyword.lower()
+                for keyword in keywords_sorted:
+                    # キーワードも正規化（全角数字を半角に変換）
+                    keyword_normalized = normalize_numbers(keyword)
+                    keyword_lower = keyword_normalized.lower()
                     
                     # 括弧内の文字を除去したキーワードを作成
-                    keyword_without_brackets = re.sub(r'[（(].*?[）)]', '', keyword)
+                    keyword_without_brackets = re.sub(r'[（(].*?[）)]', '', keyword_normalized)
                     keyword_without_brackets_lower = keyword_without_brackets.lower()
                     
-                    # マッチング方法1: 元の材料名とキーワードの完全一致または部分一致
+                    # マッチング方法1: 正規化後の材料名とキーワードの完全一致または部分一致
                     # マッチング方法2: 括弧を除去した材料名とキーワードの一致
                     # マッチング方法3: 括弧を除去した材料名と括弧を除去したキーワードの一致
                     matches = (
                         keyword_lower in material_lower or 
-                        keyword in material or
+                        keyword_normalized in material_normalized or
                         material_lower in keyword_lower or
                         keyword_without_brackets_lower in material_without_brackets_lower or
                         keyword_without_brackets in material_without_brackets or
@@ -165,27 +179,44 @@ class BaseScraper:
                     )
                     
                     if matches:
-                        # より具体的なマッチング（数字パターンを含む場合）
-                        if '%' in keyword or '％' in keyword:
+                        # パーセンテージが含まれる場合は、より厳密なマッチングが必要
+                        if '%' in keyword_normalized or '％' in keyword_normalized:
                             # パーセンテージが含まれる場合は、正確にマッチする必要がある
                             # 80%と80％の両方に対応
-                            keyword_normalized = keyword.replace('%', '％').replace('％', '%')
-                            material_normalized = material.replace('%', '％').replace('％', '%')
-                            material_without_brackets_normalized = material_without_brackets.replace('%', '％').replace('％', '%')
+                            keyword_percent_normalized = keyword_normalized.replace('%', '％').replace('％', '%')
+                            material_percent_normalized = material_normalized.replace('%', '％').replace('％', '%')
+                            material_without_brackets_percent_normalized = material_without_brackets.replace('%', '％').replace('％', '%')
                             
-                            if (keyword_normalized in material_normalized or 
-                                keyword_normalized in material_without_brackets_normalized or
-                                keyword.replace('%', '％') in material or
-                                keyword.replace('％', '%') in material):
-                                filtered_prices[target_name] = price
+                            if (keyword_percent_normalized in material_percent_normalized or 
+                                keyword_percent_normalized in material_without_brackets_percent_normalized):
+                                # マッチングスコアを計算（キーワードの長さ + 完全一致ボーナス）
+                                score = len(keyword)
+                                if keyword_normalized == material_normalized or keyword_percent_normalized == material_percent_normalized:
+                                    score += 100  # 完全一致ボーナス
+                                
+                                if score > best_match_score:
+                                    best_match = (target_name, price)
+                                    best_match_score = score
                                 break
                         else:
                             # 通常のキーワードマッチング
-                            filtered_prices[target_name] = price
+                            # マッチングスコアを計算（キーワードの長さ + 完全一致ボーナス）
+                            score = len(keyword)
+                            if keyword_normalized == material_normalized or keyword_lower == material_lower:
+                                score += 100  # 完全一致ボーナス
+                            elif keyword_normalized in material_normalized or keyword_lower in material_lower:
+                                score += 50  # 部分一致ボーナス
+                            
+                            if score > best_match_score:
+                                best_match = (target_name, price)
+                                best_match_score = score
                             break
-                
-                if target_name in filtered_prices:
-                    break
+            
+            # 最適なマッチを適用（まだフィルタリングされていない場合のみ）
+            if best_match:
+                target_name, price_value = best_match
+                if target_name not in filtered_prices:
+                    filtered_prices[target_name] = price_value
         
         return filtered_prices
     
