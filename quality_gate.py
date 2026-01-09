@@ -4,7 +4,6 @@
 品質ゲート：全社実行の後に、合格条件を自動チェック
 """
 from typing import Optional, Dict, Set, Tuple, List
-
 import logging
 from pathlib import Path
 from typing import List, Dict, Set, Tuple
