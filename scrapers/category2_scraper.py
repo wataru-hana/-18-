@@ -49,6 +49,10 @@ class Category2Scraper(BaseScraper):
             prices = self.extract_from_takahashi_kaitori(soup)
         elif extractor_type == 'dokin_div':
             prices = self.extract_from_dokin_div(soup)
+        elif extractor_type == 'ohata_text':
+            prices = self.extract_from_ohata_text(soup)
+        elif extractor_type == 'sanada' or (extractor_type == 'auto' and 'sanadakogyo.com' in self.site_config.get('price_url', '')):
+            prices = self.extract_from_sanada(soup)
         else:
             # デフォルトは自動抽出
             prices = self.extract_auto(soup)
@@ -737,6 +741,40 @@ class Category2Scraper(BaseScraper):
                             prices[material] = price
         
         return prices
+
+    def extract_from_ohata_text(self, soup: BeautifulSoup) -> Dict[str, str]:
+        """
+        大畑商事（千葉・大阪）用の抽出ロジック。
+        サイト本文に「材料名 + 価格円/kg」が文章として並ぶ構造のため、
+        テキスト全体からパターンマッチで抽出する。
+        """
+        prices = {}
+        
+        text = soup.get_text(separator=' ', strip=True)
+        if not text:
+            return prices
+        
+        text = re.sub(r'\s+', ' ', text)
+        pattern = re.compile(r'([^\d]{2,40}?)(\d{1,4}(?:[,，]\d{3})?)円\s*/?\s*kg')
+        
+        for match in pattern.finditer(text):
+            material_raw = match.group(1).strip()
+            price_raw = match.group(2)
+            
+            if not material_raw or not price_raw:
+                continue
+            
+            material_clean = re.sub(r'^[\s・:：／/（）\(\)「」『』【】]+', '', material_raw)
+            material_clean = re.sub(r'[\s・:：／/（）\(\)「」『』【】]+$', '', material_clean)
+            material_clean = material_clean.replace('一覧品目', '').strip()
+            
+            if not material_clean:
+                continue
+            
+            price_clean = price_raw.replace(',', '').replace('，', '')
+            prices[material_clean] = f"{price_clean}円/kg"
+        
+        return prices
     
     def _extract_takahashi_prices(self, soup: BeautifulSoup) -> Dict[str, str]:
         """高橋商事の価格ページから価格を抽出"""
@@ -772,5 +810,134 @@ class Category2Scraper(BaseScraper):
                             prices[material_name] = price_text + '/個'
                         else:
                             prices[material_name] = price_text
+        
+        return prices
+    
+    def extract_from_sanada(self, soup: BeautifulSoup) -> Dict[str, str]:
+        """
+        眞田鋼業株式会社用の抽出ロジック
+        説明文と品目名が結合されているHTMLから、品目名のみを抽出
+        
+        HTML構造:
+        - 説明文と品目名が同じ要素内に含まれる
+        - 品目名は説明文の末尾に付いている（例: 「...買取いたしますピカ銅」）
+        - 価格は同じ要素または別要素にある
+        
+        抽出方針:
+        1. まずextract_autoを試して、うまく抽出できない場合のみ説明文から品目名を抽出
+        2. 価格パターン（数字+円）を含む要素を探す
+        3. その要素のテキストから、説明文の後に来る品目名を抽出
+        """
+        # まずextract_autoを試す（既存のロジックが動作する場合がある）
+        prices_auto = self.extract_auto(soup)
+        
+        # 品目名のパターン（sanadaで使用される品目名、優先順位順）
+        item_patterns = [
+            r'ピカ銅',
+            r'並銅',
+            r'込銅',
+            r'込真鍮',
+            r'砲金',
+            r'上線\d+',
+            r'中線\d+',
+            r'下線\d+',
+            r'家電線',
+            r'VA線',
+            r'アルミホイール',
+            r'アルミサッシビスなし',
+            r'アルミサッシ',
+            r'アルミ缶プレス',
+            r'アルミ缶',
+            r'ステンレス[（(]?304[）)]?',
+            r'ステンレス',
+            r'バッテリー',
+        ]
+        
+        # 説明文の終わりを示すキーワード（これらの後に品目名が来る）
+        description_end_keywords = [
+            'いたします', 'ます', 'です', 'になります', 'となります',
+            'ください', 'ご相談', 'ご連絡', 'お問い合わせ',
+            'として', 'により', 'で',
+        ]
+        
+        prices = {}
+        
+        # すべての要素をチェック
+        for elem in soup.find_all(['div', 'p', 'td', 'li', 'span', 'dt', 'dd']):
+            text = elem.get_text(strip=True)
+            
+            # 価格パターンを探す（数字+円）
+            price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)\s*[円¥]', text)
+            if not price_match:
+                continue
+            
+            # 価格を抽出
+            price_value = price_match.group(1).replace(',', '').replace('，', '')
+            price = price_value + '円'
+            
+            # 価格の直前のテキストから品目名を抽出
+            before_price = text[:price_match.start()].strip()
+            if not before_price:
+                continue
+            
+            material = None
+            
+            # 方法1: 説明文終了キーワードの後から品目名を探す
+            for keyword in description_end_keywords:
+                if keyword in before_price:
+                    # キーワードの後の部分を取得（最大20文字）
+                    parts = before_price.split(keyword)
+                    if len(parts) >= 2:
+                        after_keyword = parts[-1].strip()  # 最後の部分（最も近い品目名）
+                        # 長すぎる場合は最後の20文字のみを対象
+                        if len(after_keyword) > 20:
+                            after_keyword = after_keyword[-20:]
+                        # 品目名パターンにマッチするか確認
+                        for pattern in item_patterns:
+                            match = re.search(pattern, after_keyword)
+                            if match:
+                                material = match.group(0)
+                                break
+                        if material:
+                            break
+            
+            # 方法2: 品目名パターンに直接マッチ（説明文キーワードがない場合）
+            if not material:
+                for pattern in item_patterns:
+                    match = re.search(pattern, before_price)
+                    if match:
+                        matched_text = match.group(0)
+                        # マッチした位置がテキストの後半（最後の20文字以内）なら採用
+                        match_end = match.end()
+                        if match_end >= len(before_price) - 20:
+                            material = matched_text
+                            break
+            
+            # 方法3: テキストの最後の部分（最大15文字）から品目名を抽出
+            if not material and len(before_price) > 0:
+                # 最後の15文字から品目名パターンを探す
+                last_part = before_price[-15:] if len(before_price) >= 15 else before_price
+                for pattern in item_patterns:
+                    match = re.search(pattern, last_part)
+                    if match:
+                        material = match.group(0)
+                        break
+            
+            # 品目名が見つかった場合のみ追加
+            if material:
+                # 品目名のクリーンアップ
+                material = material.strip()
+                # 余分な文字を除去（前後の記号など）
+                material = re.sub(r'^[^\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+', '', material)
+                material = re.sub(r'[^\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+$', '', material)
+                material = material.strip()
+                
+                if material and 2 <= len(material) <= 15:  # 品目名は2-15文字の範囲
+                    prices[material] = price
+        
+        # extract_autoの結果とマージ（extract_autoで正しく抽出された項目も含める）
+        for key, value in prices_auto.items():
+            if key not in prices:
+                prices[key] = value
         
         return prices

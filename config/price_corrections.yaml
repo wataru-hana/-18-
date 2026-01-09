@@ -150,6 +150,10 @@ corrections:
     modify:
     - material: 上銅
       material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 砲金
+      material_new: 砲金
     - material: 真鍮（上）
       material_new: 真鍮
     - material: 雑線S（80%）
@@ -161,6 +165,45 @@ corrections:
     - material: 雑線A
       material_new: 雑線60%-65%
     - material: VA線（巻き）
+      material_new: VA線
+    - material: ＶＡ線(巻き)
+      material_new: VA線
+    - material: アルミ（上）
+      material_new: アルミサッシ
+    - material: アルミ缶（プレス）
+      material_new: アルミ缶
+    - material: ステンレス（上）
+      material_new: ステンレス304
+    - material: バッテリー（上）
+      material_new: 鉛バッテリー
+  
+  # dokin（土金（大阪）のid）にも同じマッピングを適用
+  dokin:
+    # サイト上の表記: 上銅, 並銅, 砲金, 真鍮（上）, 雑線S, 雑線A, VA線（巻き）,
+    # アルミ（上）, アルミ缶（プレス）, ステンレス（上）, バッテリー（上）
+    # ※アルミホイールは取り扱いなし
+    remove:
+    - アルミホイール
+    modify:
+    - material: 上銅
+      material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 砲金
+      material_new: 砲金
+    - material: 真鍮（上）
+      material_new: 真鍮
+    - material: 雑線S（80%）
+      material_new: 雑線80%
+    - material: 雑線S
+      material_new: 雑線80%
+    - material: 雑線A（60%）
+      material_new: 雑線60%-65%
+    - material: 雑線A
+      material_new: 雑線60%-65%
+    - material: VA線（巻き）
+      material_new: VA線
+    - material: ＶＡ線(巻き)
       material_new: VA線
     - material: アルミ（上）
       material_new: アルミサッシ
@@ -247,6 +290,32 @@ corrections:
       material_new: 雑線80%
     - material: 上線（60％）SV
       material_new: 雑線60%-65%
+    - material: アルミ（63S）
+      material_new: アルミサッシ
+    - material: ステンレス（304系）
+      material_new: ステンレス304
+    - material: 車バッテリー
+      material_new: 鉛バッテリー
+  
+  # tohoku_king（東北キングのid）にも同じマッピングを適用
+  tohoku_king:
+    # サイト上の表記: ピカ銅, 並銅, 砲金コロ, 込真鍮, 上線（80％）, 上線（60％）SV,
+    # アルミホイール, アルミ（63S）, ステンレス（304系）, 車バッテリー
+    # ※VA線、アルミ缶は取り扱いなし
+    remove:
+    - VA線
+    - アルミ缶
+    modify:
+    - material: 砲金コロ
+      material_new: 砲金
+    - material: 込真鍮
+      material_new: 真鍮
+    - material: 上線（80％）
+      material_new: 雑線80%
+    - material: 上線（80%）
+      material_new: 雑線80%
+    - material: 上線（60％）SV
+      material_new: 雑線60%-65%
     - material: 上線（60%）SV
       material_new: 雑線60%-65%
     - material: アルミ（63S）
@@ -264,9 +333,45 @@ corrections:
       material_new: 真鍮
     - material: 上線(80%)
       material_new: 雑線80%
+    - material: 上線80
+      material_new: 雑線80%
     - material: 中線(65%)
       material_new: 雑線60%-65%
+    - material: 中線65
+      material_new: 雑線60%-65%
+    - material: 家電線
+      material_new: VA線
     - material: アルミサッシ（ビスなし）
+      material_new: アルミサッシ
+    - material: アルミサッシビスなし
+      material_new: アルミサッシ
+    - material: ステンレス（304）
+      material_new: ステンレス304
+    - material: バッテリー
+      material_new: 鉛バッテリー
+  
+  # sanada（眞田鋼業株式会社のid）にも同じマッピングを適用
+  sanada:
+    # サイト上の表記: ピカ銅, 並銅, 砲金, 込真鍮, 上線(80%), 中線(65%), VA線,
+    # アルミホイール, アルミサッシ（ビスなし）, アルミ缶, ステンレス（304）, バッテリー
+    modify:
+    - material: 込銅
+      material_new: 並銅  # 込銅を並銅にマッピング
+    - material: 込真鍮
+      material_new: 真鍮
+    - material: 上線(80%)
+      material_new: 雑線80%
+    - material: 上線80
+      material_new: 雑線80%
+    - material: 中線(65%)
+      material_new: 雑線60%-65%
+    - material: 中線65
+      material_new: 雑線60%-65%
+    - material: 家電線
+      material_new: VA線
+    - material: アルミサッシ（ビスなし）
+      material_new: アルミサッシ
+    - material: アルミサッシビスなし
       material_new: アルミサッシ
     - material: ステンレス（304）
       material_new: ステンレス304
@@ -312,6 +417,32 @@ corrections:
       material_new: 雑線80%
     - material: 三本線65%
       material_new: 雑線60%-65%
+    - material: VA線・巻物
+      material_new: VA線
+    - material: アルミサッシA 付物なし
+      material_new: アルミサッシ
+    - material: 自動車バッテリー
+      material_new: 鉛バッテリー
+    - material: ステンレス
+      material_new: ステンレス304
+  
+  # touki（東起産業（株）のid）にも同じマッピングを適用
+  touki:
+    # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮A, 一本線80%, 三本線65%, VA線,
+    # アルミホイール, アルミサッシA 付物なし, ステンレス, 自動車バッテリー
+    # ※アルミ缶は取り扱いなし
+    remove:
+    - アルミ缶
+    - アルミ缶
+    modify:
+    - material: 真鍮A
+      material_new: 真鍮
+    - material: 一本線80%
+      material_new: 雑線80%
+    - material: 三本線65%
+      material_new: 雑線60%-65%
+    - material: VA線・巻物
+      material_new: VA線
     - material: アルミサッシA 付物なし
       material_new: アルミサッシ
     - material: 自動車バッテリー
@@ -411,12 +542,15 @@ corrections:
     # ※アルミ缶は、(表記価格+5) × 1.1 = 最終価格
     # サイト上の表記: 1号銅線(ピカ線), 銅(並)銅管, 砲金B(青銅鋳物), 真鍮(上)A(他金属 無),
     # アルミホイール, アルミサッシA63S(付物無し), アルミ缶(バラ), ステンレス18-8A(SUS304屑), 鉛バッテリー
+    # ※実際のitem_rawは「銅（並）」（銅管が含まれていない）なので、これを並銅にマッピング
     remove:
     - 雑旋
     modify:
     - material: 1号銅線(ピカ線)
       material_new: ピカ銅
     - material: 銅(並)銅管
+      material_new: 並銅
+    - material: 銅（並）
       material_new: 並銅
     - material: 砲金B(青銅鋳物)
       material_new: 砲金
@@ -462,32 +596,195 @@ corrections:
       material_new: アルミ缶
 
   株式会社 大垣金属:
-    # サイト上の表記: ピカ銅, 並銅, 砲金, 真鍮, 電線A（８０％以上）, 三本線A（60％）,
-    # VA線, アルミホイール, アルミサッシ, アルミ缶, ステンレス, カーバッテリー
+    # サイト上の表記: ピカ線（ピカ銅）, 並銅, 砲金（青銅）, 真鍮（異物無）, 電線A（８０％以上）,
+    # 三本線A（60％）, VA線, アルミホイール, アルミサッシ A, バラ缶, ステンレス, カーバッテリー
     modify:
+    - material: ピカ線（ピカ銅）
+      material_new: ピカ銅
+    - material: ピカ線(ピカ銅)
+      material_new: ピカ銅
+    - material: ピカ線
+      material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 砲金（青銅）
+      material_new: 砲金
+    - material: 砲金(青銅)
+      material_new: 砲金
+    - material: 砲金
+      material_new: 砲金
+    - material: 真鍮（異物無）
+      material_new: 真鍮
+    - material: 真鍮(異物無)
+      material_new: 真鍮
+    - material: 真鍮
+      material_new: 真鍮
     - material: 電線A（８０％以上）
       material_new: 雑線80%
     - material: 電線A（80％以上）
       material_new: 雑線80%
     - material: 電線A（80%以上）
       material_new: 雑線80%
+    - material: 電線A
+      material_new: 雑線80%
     - material: 三本線A（60％）
       material_new: 雑線60%-65%
     - material: 三本線A（60%）
       material_new: 雑線60%-65%
+    - material: 三本線A
+      material_new: 雑線60%-65%
+    - material: 三本線
+      material_new: 雑線60%-65%
+    - material: VA線
+      material_new: VA線
+    - material: アルミホイール
+      material_new: アルミホイール
+    - material: アルミサッシ A
+      material_new: アルミサッシ
+    - material: アルミサッシA
+      material_new: アルミサッシ
+    - material: アルミサッシ
+      material_new: アルミサッシ
+    - material: バラ缶
+      material_new: アルミ缶
     - material: ステンレス
       material_new: ステンレス304
     - material: カーバッテリー
       material_new: 鉛バッテリー
+    - material: バッテリー
+      material_new: 鉛バッテリー
+  
+  # ogaki（株式会社 大垣金属のid）にも同じマッピングを適用
+  ogaki:
+    # サイト上の表記: ピカ線（ピカ銅）, 並銅, 砲金（青銅）, 真鍮（異物無）, 電線A（８０％以上）,
+    # 三本線A（60％）, VA線, アルミホイール, アルミサッシ A, バラ缶, ステンレス, カーバッテリー
+    modify:
+    - material: ピカ線（ピカ銅）
+      material_new: ピカ銅
+    - material: ピカ線(ピカ銅)
+      material_new: ピカ銅
+    - material: ピカ線
+      material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 砲金（青銅）
+      material_new: 砲金
+    - material: 砲金(青銅)
+      material_new: 砲金
+    - material: 砲金
+      material_new: 砲金
+    - material: 真鍮（異物無）
+      material_new: 真鍮
+    - material: 真鍮(異物無)
+      material_new: 真鍮
+    - material: 真鍮
+      material_new: 真鍮
+    - material: 電線A（８０％以上）
+      material_new: 雑線80%
+    - material: 電線A（80％以上）
+      material_new: 雑線80%
+    - material: 電線A（80%以上）
+      material_new: 雑線80%
+    - material: 電線A
+      material_new: 雑線80%
+    - material: 三本線A（60％）
+      material_new: 雑線60%-65%
+    - material: 三本線A（60%）
+      material_new: 雑線60%-65%
+    - material: 三本線A
+      material_new: 雑線60%-65%
+    - material: 三本線
+      material_new: 雑線60%-65%
+    - material: VA線
+      material_new: VA線
+    - material: アルミホイール
+      material_new: アルミホイール
+    - material: アルミサッシ A
+      material_new: アルミサッシ
+    - material: アルミサッシA
+      material_new: アルミサッシ
+    - material: アルミサッシ
+      material_new: アルミサッシ
+    - material: バラ缶
+      material_new: アルミ缶
+    - material: ステンレス
+      material_new: ステンレス304
+    - material: カーバッテリー
+      material_new: 鉛バッテリー
+    - material: バッテリー
+      material_new: 鉛バッテリー
 
   高橋商事株式会社:
-    # サイト上の表記: 三本線（銅率65%）, VA線, ステンレス 等
+    # サイト上の表記: ピカ銅, 並銅, 真鍮, 一本線（銅率80%）, 三本線（銅率65%）,
+    # アルミホイール, アルミサッシ, アルミ缶, ステンレス, バッテリー
+    # ※砲金、VA線は取り扱いなし
+    remove:
+      - 砲金
+      - VA線
     modify:
+    - material: ピカ銅
+      material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 真鍮
+      material_new: 真鍮
+    - material: 一本線（銅率80%）
+      material_new: 雑線80%
+    - material: 一本線（銅率80％）
+      material_new: 雑線80%
+    - material: 一本線(銅率80%)
+      material_new: 雑線80%
     - material: 三本線（銅率65%）
       material_new: 雑線60%-65%
     - material: 三本線（銅率65％）
       material_new: 雑線60%-65%
     - material: 三本線(銅率65%)
       material_new: 雑線60%-65%
+    - material: アルミホイール
+      material_new: アルミホイール
+    - material: アルミサッシ
+      material_new: アルミサッシ
+    - material: アルミ缶
+      material_new: アルミ缶
     - material: ステンレス
       material_new: ステンレス304
+    - material: バッテリー
+      material_new: 鉛バッテリー
+  
+  # takahashi（高橋商事株式会社のid）にも同じマッピングを適用
+  takahashi:
+    # サイト上の表記: ピカ銅, 並銅, 真鍮, 一本線（銅率80%）, 三本線（銅率65%）,
+    # アルミホイール, アルミサッシ, アルミ缶, ステンレス, バッテリー
+    # ※砲金、VA線は取り扱いなし
+    remove:
+      - 砲金
+      - VA線
+    modify:
+    - material: ピカ銅
+      material_new: ピカ銅
+    - material: 並銅
+      material_new: 並銅
+    - material: 真鍮
+      material_new: 真鍮
+    - material: 一本線（銅率80%）
+      material_new: 雑線80%
+    - material: 一本線（銅率80％）
+      material_new: 雑線80%
+    - material: 一本線(銅率80%)
+      material_new: 雑線80%
+    - material: 三本線（銅率65%）
+      material_new: 雑線60%-65%
+    - material: 三本線（銅率65％）
+      material_new: 雑線60%-65%
+    - material: 三本線(銅率65%)
+      material_new: 雑線60%-65%
+    - material: アルミホイール
+      material_new: アルミホイール
+    - material: アルミサッシ
+      material_new: アルミサッシ
+    - material: アルミ缶
+      material_new: アルミ缶
+    - material: ステンレス
+      material_new: ステンレス304
+    - material: バッテリー
+      material_new: 鉛バッテリー

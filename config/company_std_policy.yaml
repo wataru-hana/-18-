@@ -1,0 +1,31 @@
+# 会社ごとの標準品目ポリシー
+# 各会社が対応しない標準品目を宣言できます
+# キーは company_id または company_name のどちらでも指定可能
+
+companies:
+  # 有限会社金田商事（company_id = "有限会社金田商事"）
+  有限会社金田商事:
+    exclude_std_items:
+      - 雑線80%
+      - 雑線60%-65%
+      - VA線
+    # exclude_std_items = "この会社では標準品目として扱わない（=欠損にしない）"リスト
+  
+  # 東北キング（company_id = "tohoku_king"）
+  tohoku_king:
+    exclude_std_items:
+      - VA線
+      - アルミ缶
+  
+  # 高橋商事株式会社（company_id = "takahashi"）
+  takahashi:
+    exclude_std_items:
+      - VA線
+      - 砲金
+  
+  # 必要に応じて他の会社も追加できます
+  # company_idまたはcompany_name:
+  #   exclude_std_items:
+  #     - 標準品目名1
+  #     - 標準品目名2
+
