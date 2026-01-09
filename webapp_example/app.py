@@ -113,15 +113,15 @@ def start_scraping():
         
         # 設定ファイルのパスを取得（webapp_example内または親ディレクトリから）
         def get_config_path(filename):
-        """設定ファイルのパスを取得（デプロイ環境に対応）"""
-        # まずwebapp_example内のconfigフォルダを確認
-        local_path = os.path.join(os.path.dirname(__file__), 'config', filename)
-        if os.path.exists(local_path):
-            return local_path
-        # 次に親ディレクトリのconfigフォルダを確認
-        parent_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', filename)
-        if os.path.exists(parent_path):
-            return parent_path
+            """設定ファイルのパスを取得（デプロイ環境に対応）"""
+            # まずwebapp_example内のconfigフォルダを確認
+            local_path = os.path.join(os.path.dirname(__file__), 'config', filename)
+            if os.path.exists(local_path):
+                return local_path
+            # 次に親ディレクトリのconfigフォルダを確認
+            parent_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', filename)
+            if os.path.exists(parent_path):
+                return parent_path
             # どちらも見つからない場合は親ディレクトリを返す
             return parent_path
         
@@ -187,86 +187,86 @@ def start_scraping():
         
         # スクレイピング実行
         for site_config in implemented_sites:
-        company_name = site_config.get('name', '不明')
-        category = site_config.get('category', 2)
-        
-        try:
-            # カテゴリに応じてスクレイパーを選択
-            if category == 1:
-                scraper = Category1Scraper(site_config, delay=2.0)
-            elif category == 2:
-                scraper = Category2Scraper(site_config, delay=2.0)
-            else:
-                continue
+            company_name = site_config.get('name', '不明')
+            category = site_config.get('category', 2)
             
-            # スクレイピング実行
-            result = scraper.scrape(
-                filter_target_items=True,
-                target_items_config=target_items
-            )
-            
-            # デバッグ: resultの内容を確認
-            print(f"DEBUG {company_name}: result type={type(result)}, keys={result.keys() if isinstance(result, dict) else 'N/A'}")
-            if isinstance(result, dict):
-                print(f"DEBUG {company_name}: prices type={type(result.get('prices'))}, value={result.get('prices')}")
-            
-            # 企業名を正規化
-            company_name_normalized = normalize_company_name(company_name)
-            result['company_name'] = company_name_normalized
-            
-            # 価格修正マッピングを適用
-            if company_name_normalized in corrections:
-                try:
-                    correction_config = corrections[company_name_normalized]
-                    if not isinstance(correction_config, dict):
-                        print(f"WARNING: correction_config is not a dict for {company_name_normalized}: {type(correction_config)}")
-                    else:
-                        result = apply_price_corrections_single(result, correction_config, company_name_normalized)
-                except Exception as e:
-                    print(f"ERROR in apply_price_corrections_single for {company_name_normalized}: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    # エラーが発生しても続行（修正なしで続ける）
-            
-            # データベースに保存
-            company = Company.query.filter_by(name=company_name_normalized).first()
-            if not company:
-                company = Company(
-                    name=company_name_normalized,
-                    region=site_config.get('region', ''),
-                    price_url=site_config.get('price_url', ''),
-                    category=category,
-                    extractor_type=site_config.get('extractor_type', ''),
-                    is_implemented=True
+            try:
+                # カテゴリに応じてスクレイパーを選択
+                if category == 1:
+                    scraper = Category1Scraper(site_config, delay=2.0)
+                elif category == 2:
+                    scraper = Category2Scraper(site_config, delay=2.0)
+                else:
+                    continue
+                
+                # スクレイピング実行
+                result = scraper.scrape(
+                    filter_target_items=True,
+                    target_items_config=target_items
                 )
-                db.session.add(company)
-                db.session.commit()
-            
-            # 価格データを保存
-            prices = result.get('prices', {})
-            if not isinstance(prices, dict):
-                raise ValueError(f"prices is not a dict: {type(prices)}, value={prices}")
-            for material_name, price_value in prices.items():
-                price_data = PriceData(
-                    company_id=company.id,
-                    material_name=material_name,
-                    price=price_value,
-                    scraped_at=datetime.utcnow()
-                )
-                db.session.add(price_data)
-            
-            results.append({
-                'company': company_name_normalized,
-                'price_count': len(prices),
-                'status': 'success'
-            })
-        
-        except Exception as e:
-            import traceback
-            error_detail = traceback.format_exc()
-            print(f"エラー発生: {company_name}")
-            print(f"エラー内容: {str(e)}")
-            print(f"詳細: {error_detail}")
+                
+                # デバッグ: resultの内容を確認
+                print(f"DEBUG {company_name}: result type={type(result)}, keys={result.keys() if isinstance(result, dict) else 'N/A'}")
+                if isinstance(result, dict):
+                    print(f"DEBUG {company_name}: prices type={type(result.get('prices'))}, value={result.get('prices')}")
+                
+                # 企業名を正規化
+                company_name_normalized = normalize_company_name(company_name)
+                result['company_name'] = company_name_normalized
+                
+                # 価格修正マッピングを適用
+                if company_name_normalized in corrections:
+                    try:
+                        correction_config = corrections[company_name_normalized]
+                        if not isinstance(correction_config, dict):
+                            print(f"WARNING: correction_config is not a dict for {company_name_normalized}: {type(correction_config)}")
+                        else:
+                            result = apply_price_corrections_single(result, correction_config, company_name_normalized)
+                    except Exception as e:
+                        print(f"ERROR in apply_price_corrections_single for {company_name_normalized}: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        # エラーが発生しても続行（修正なしで続ける）
+                
+                # データベースに保存
+                company = Company.query.filter_by(name=company_name_normalized).first()
+                if not company:
+                    company = Company(
+                        name=company_name_normalized,
+                        region=site_config.get('region', ''),
+                        price_url=site_config.get('price_url', ''),
+                        category=category,
+                        extractor_type=site_config.get('extractor_type', ''),
+                        is_implemented=True
+                    )
+                    db.session.add(company)
+                    db.session.commit()
+                
+                # 価格データを保存
+                prices = result.get('prices', {})
+                if not isinstance(prices, dict):
+                    raise ValueError(f"prices is not a dict: {type(prices)}, value={prices}")
+                for material_name, price_value in prices.items():
+                    price_data = PriceData(
+                        company_id=company.id,
+                        material_name=material_name,
+                        price=price_value,
+                        scraped_at=datetime.utcnow()
+                    )
+                    db.session.add(price_data)
+                
+                results.append({
+                    'company': company_name_normalized,
+                    'price_count': len(prices),
+                    'status': 'success'
+                })
+                
+            except Exception as e:
+                import traceback
+                error_detail = traceback.format_exc()
+                print(f"エラー発生: {company_name}")
+                print(f"エラー内容: {str(e)}")
+                print(f"詳細: {error_detail}")
                 results.append({
                     'company': company_name,
                     'status': 'error',
