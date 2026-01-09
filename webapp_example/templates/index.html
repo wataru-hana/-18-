@@ -83,6 +83,20 @@
                     body: JSON.stringify({})
                 });
                 
+                // レスポンスが成功かどうかをチェック
+                if (!response.ok) {
+                    // エラーレスポンスの場合、テキストを取得して表示
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 200)}`);
+                }
+                
+                // Content-Typeをチェック
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`予期しないレスポンス形式: ${contentType}. レスポンス: ${text.substring(0, 200)}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.status === 'completed') {

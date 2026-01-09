@@ -107,11 +107,12 @@ def get_companies():
 @app.route('/api/scrape', methods=['POST'])
 def start_scraping():
     """スクレイピングを開始（同期的に実行）"""
-    data = request.json or {}
-    company_ids = data.get('company_ids', None)
-    
-    # 設定ファイルのパスを取得（webapp_example内または親ディレクトリから）
-    def get_config_path(filename):
+    try:
+        data = request.json or {}
+        company_ids = data.get('company_ids', None)
+        
+        # 設定ファイルのパスを取得（webapp_example内または親ディレクトリから）
+        def get_config_path(filename):
         """設定ファイルのパスを取得（デプロイ環境に対応）"""
         # まずwebapp_example内のconfigフォルダを確認
         local_path = os.path.join(os.path.dirname(__file__), 'config', filename)
@@ -121,31 +122,31 @@ def start_scraping():
         parent_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', filename)
         if os.path.exists(parent_path):
             return parent_path
-        # どちらも見つからない場合は親ディレクトリを返す
-        return parent_path
-    
-    # 設定ファイルを読み込み
-    config_path = get_config_path('sites.yaml')
-    with open(config_path, 'r', encoding='utf-8') as f:
-        sites_config = yaml.safe_load(f)
-        sites = sites_config.get('sites', [])
-    
-    # 対象アイテム設定を読み込み
-    target_items_path = get_config_path('target_items.yaml')
-    with open(target_items_path, 'r', encoding='utf-8') as f:
-        target_items_config = yaml.safe_load(f)
-        target_items = target_items_config.get('target_items', [])
-    
-    # 価格修正マッピングを読み込み
-    corrections_path = get_config_path('price_corrections.yaml')
-    with open(corrections_path, 'r', encoding='utf-8') as f:
-        corrections_config = yaml.safe_load(f)
-        corrections = corrections_config.get('corrections', {})
-    
-    results = []
-    
-    # 実装済み21社のリスト（3社追加: 鴻陽産業、大垣金属、高橋商事）
-    IMPLEMENTED_COMPANIES = {
+            # どちらも見つからない場合は親ディレクトリを返す
+            return parent_path
+        
+        # 設定ファイルを読み込み
+        config_path = get_config_path('sites.yaml')
+        with open(config_path, 'r', encoding='utf-8') as f:
+            sites_config = yaml.safe_load(f)
+            sites = sites_config.get('sites', [])
+        
+        # 対象アイテム設定を読み込み
+        target_items_path = get_config_path('target_items.yaml')
+        with open(target_items_path, 'r', encoding='utf-8') as f:
+            target_items_config = yaml.safe_load(f)
+            target_items = target_items_config.get('target_items', [])
+        
+        # 価格修正マッピングを読み込み
+        corrections_path = get_config_path('price_corrections.yaml')
+        with open(corrections_path, 'r', encoding='utf-8') as f:
+            corrections_config = yaml.safe_load(f)
+            corrections = corrections_config.get('corrections', {})
+        
+        results = []
+        
+        # 実装済み21社のリスト（3社追加: 鴻陽産業、大垣金属、高橋商事）
+        IMPLEMENTED_COMPANIES = {
         '眞田鋼業株式会社', '有限会社金田商事', '木村金属（大阪）',
         '明鑫貿易株式会社', '東起産業（株）', '土金（大阪）',
         '大畑商事（千葉・大阪）', '千福商会（大阪）', '鴻祥貿易株式会社',
@@ -153,39 +154,39 @@ def start_scraping():
         '株式会社 春日商会　滋賀支店', '株式会社 春日商会　一宮本社',
         '安城貿易（愛知）', '東北キング', '株式会社八木',
         '有限会社　八尾アルミセンター', '株式会社 ヒラノヤ',
-        '鴻陽産業株式会社 岐阜工場', '株式会社 大垣金属',
-        '高橋商事株式会社'
-    }
-    
-    # 実装済み企業のみをフィルタリング
-    implemented_sites = []
-    for site in sites:
-        company_name = site.get('name', '')
-        # 文字化けなどを補正して正規化した名前を取得
-        company_name_normalized = normalize_company_name(company_name)
+            '鴻陽産業株式会社 岐阜工場', '株式会社 大垣金属',
+            '高橋商事株式会社'
+        }
         
-        # 正規化後の企業名が実装済み18社に含まれているか確認
-        # 完全一致または部分一致で確認
-        is_implemented = False
-        if company_name_normalized in IMPLEMENTED_COMPANIES:
-            is_implemented = True
-        else:
-            # 部分一致で確認（文字化けなどで完全一致しない場合のフォールバック）
-            for impl_name in IMPLEMENTED_COMPANIES:
-                # 正規化した実装済み企業名と比較
-                impl_normalized = normalize_company_name(impl_name)
-                if (impl_normalized in company_name_normalized or 
-                    company_name_normalized in impl_normalized or
-                    impl_name in company_name_normalized or
-                    company_name_normalized in impl_name):
-                    is_implemented = True
-                    break
+        # 実装済み企業のみをフィルタリング
+        implemented_sites = []
+        for site in sites:
+            company_name = site.get('name', '')
+            # 文字化けなどを補正して正規化した名前を取得
+            company_name_normalized = normalize_company_name(company_name)
+            
+            # 正規化後の企業名が実装済み18社に含まれているか確認
+            # 完全一致または部分一致で確認
+            is_implemented = False
+            if company_name_normalized in IMPLEMENTED_COMPANIES:
+                is_implemented = True
+            else:
+                # 部分一致で確認（文字化けなどで完全一致しない場合のフォールバック）
+                for impl_name in IMPLEMENTED_COMPANIES:
+                    # 正規化した実装済み企業名と比較
+                    impl_normalized = normalize_company_name(impl_name)
+                    if (impl_normalized in company_name_normalized or 
+                        company_name_normalized in impl_normalized or
+                        impl_name in company_name_normalized or
+                        company_name_normalized in impl_name):
+                        is_implemented = True
+                        break
+            
+            if is_implemented:
+                implemented_sites.append(site)
         
-        if is_implemented:
-            implemented_sites.append(site)
-    
-    # スクレイピング実行
-    for site_config in implemented_sites:
+        # スクレイピング実行
+        for site_config in implemented_sites:
         company_name = site_config.get('name', '不明')
         category = site_config.get('category', 2)
         
@@ -266,23 +267,36 @@ def start_scraping():
             print(f"エラー発生: {company_name}")
             print(f"エラー内容: {str(e)}")
             print(f"詳細: {error_detail}")
-            results.append({
-                'company': company_name,
-                'status': 'error',
-                'error': f"{str(e)}: {error_detail[:200]}"
-            })
-    
-    db.session.commit()
-    
-    # 各材料の最高価格を計算
-    max_prices = calculate_max_prices()
-    
-    return jsonify({
-        'status': 'completed',
-        'results': results,
-        'total': len(results),
-        'max_prices': max_prices
-    })
+                results.append({
+                    'company': company_name,
+                    'status': 'error',
+                    'error': f"{str(e)}: {error_detail[:200]}"
+                })
+        
+        db.session.commit()
+        
+        # 各材料の最高価格を計算
+        max_prices = calculate_max_prices()
+        
+        return jsonify({
+            'status': 'completed',
+            'results': results,
+            'total': len(results),
+            'max_prices': max_prices
+        })
+        
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"ERROR in start_scraping: {e}")
+        print(error_detail)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'type': type(e).__name__,
+            'trace': error_detail[:1000]  # 最初の1000文字のみ
+        }), 500
 
 @app.route('/api/reset-database', methods=['POST'])
 def reset_database():
