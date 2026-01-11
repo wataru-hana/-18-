@@ -572,8 +572,8 @@ def download_excel():
     # データベースから全ての価格データを取得（材料名・企業名のペアごとに最新のものを使用）
     all_prices = PriceData.query.order_by(PriceData.scraped_at.desc()).all()
     
-    # 企業名→材料名→価格のディクショナリを作成（最新のもののみ保持）
-    price_dict = {}  # {normalized_company_name: {normalized_material: price}}
+    # 企業名→STDキー→価格のディクショナリを作成（最新のもののみ保持）
+    price_dict = {}  # {normalized_company_name: {std_key: price}}
     
     for price_data in all_prices:
         company = price_data.company
@@ -583,29 +583,31 @@ def download_excel():
         company_name_normalized = normalize_company_name(company.name)
         material_name = price_data.material_name
         
-        # 材料名を正規化（より具体的なマッピングを優先）
-        normalized_material = None
-        best_match_length = 0
+        # データベースの材料名をnormalize_key()で正規化
+        material_normalized = normalize_key(material_name)
         
-        for key, value in MATERIAL_MAPPING.items():
-            if key in material_name or material_name in key:
-                # より長いマッチを優先（より具体的なマッピング）
-                match_length = len(key) if key in material_name else len(material_name)
-                if match_length > best_match_length:
-                    normalized_material = value
-                    best_match_length = match_length
+        # 正規化後のキーがMATERIAL_LISTのどのSTDキーと一致するか探す
+        std_key = None
+        for material in MATERIAL_LIST:
+            if normalize_key(material) == material_normalized:
+                std_key = material
+                break
         
-        if not normalized_material:
+        # MATERIAL_LISTに一致するSTDキーが見つからない場合はスキップ
+        if not std_key:
             continue
         
         # まだこの組み合わせの価格がなければ追加（降順なので最初が最新）
         if company_name_normalized not in price_dict:
             price_dict[company_name_normalized] = {}
         
-        if normalized_material not in price_dict[company_name_normalized]:
+        # 正規化後のキーで重複チェック
+        std_key_normalized = normalize_key(std_key)
+        existing_keys_normalized = {normalize_key(k) for k in price_dict[company_name_normalized].keys()}
+        if std_key_normalized not in existing_keys_normalized:
             price_value = normalize_price(price_data.price)
             if price_value is not None:
-                price_dict[company_name_normalized][normalized_material] = price_value
+                price_dict[company_name_normalized][std_key] = price_value
     
     # 表に価格を記入
     for row_idx, table_company in enumerate(COMPANY_LIST, 2):
@@ -639,21 +641,31 @@ def download_excel():
             print(f"DEBUG: price_dict内の企業名: {list(price_dict.keys())[:5]}...")  # 最初の5つだけ
             continue
         
-        # 各材料の価格を記入
-        for col_idx, table_material in enumerate(MATERIAL_LIST, 2):
-            if table_material in price_dict[matched_company]:
-                price_value = price_dict[matched_company][table_material]
-                if price_value is not None:
-                    try:
-                        # 数値を整数に変換して書き込み
-                        cell = ws_table.cell(row=row_idx, column=col_idx, value=int(price_value))
-                        cell.alignment = center_align
-                        cell.border = thin_border
-                    except (ValueError, TypeError):
-                        # 変換できない場合は文字列として書き込み
-                        cell = ws_table.cell(row=row_idx, column=col_idx, value=str(price_value))
-                        cell.alignment = center_align
-                        cell.border = thin_border
+        # Excel列マッチング（normalize_key()を使った照合）
+        for col_idx, excel_header in enumerate(MATERIAL_LIST, 2):
+            norm_excel = normalize_key(excel_header)
+            
+            # price_dict内のSTDキーを全てチェック
+            for std_key, price_value in price_dict[matched_company].items():
+                norm_std = normalize_key(std_key)
+                
+                if norm_excel == norm_std:
+                    # マッチした場合、価格を書き込み
+                    if price_value is not None:
+                        try:
+                            # 数値を整数に変換して書き込み
+                            cell = ws_table.cell(row=row_idx, column=col_idx, value=int(price_value))
+                            cell.alignment = center_align
+                            cell.border = thin_border
+                        except (ValueError, TypeError):
+                            # 変換できない場合は文字列として書き込み
+                            cell = ws_table.cell(row=row_idx, column=col_idx, value=str(price_value))
+                            cell.alignment = center_align
+                            cell.border = thin_border
+                        
+                        # ログ出力
+                        print(f"MATCHED: {table_company}, {std_key}, {excel_header}, {price_value}")
+                    break  # 一度マッチしたら次のヘッダーへ
     
     # 列幅を調整
     ws_table.column_dimensions['A'].width = 28  # 会社名列
@@ -793,6 +805,56 @@ def normalize_company_name(name):
             return value
     
     return name
+
+def normalize_key(key):
+    """キーを正規化（ExcelヘッダーとSTDキーの照合用）
+    
+    仕様：
+    - 全角スペース、半角スペースを削除
+    - 全角％→半角%に統一
+    - 「　」「_」「-」などの記号は除去
+    - 大文字小文字は無視
+    - 同義語aliasを適用（正規化後）
+    """
+    if not key:
+        return ''
+    
+    # 文字列に変換
+    key = str(key)
+    
+    # 全角％→半角%に統一
+    key = key.replace('％', '%')
+    
+    # 全角スペース、半角スペースを削除
+    key = key.replace(' ', '').replace('　', '')
+    
+    # 記号を除去（「_」「-」など）
+    key = re.sub(r'[_\-\－＿]', '', key)
+    
+    # 大文字小文字を無視（小文字に統一）
+    key = key.lower()
+    
+    # 同義語aliasを適用（正規化後）
+    # アルミ缶関連のチェック（「アルミ缶」を含むキーはすべて「アルミ缶」に正規化）
+    if 'アルミ缶' in key or key in ['ubc', '缶', 'バラ缶', 'プレス缶']:
+        key = 'アルミ缶'
+    # ピカ銅関連
+    elif key in ['ピカ銅', 'ピカ線', '上銅']:
+        key = 'ピカ銅'
+    # 雑線80%関連（「雑線80%」を含む、または完全一致）
+    elif '雑線80%' in key or key in ['一本線80%', '上線80%']:
+        key = '雑線80%'
+    # 雑線60%-65%関連（「雑線60%-65%」または「雑60%-65%」を含む、または完全一致）
+    elif '雑線60%-65%' in key or '雑60%-65%' in key or key in ['三本線60%', '上線60%']:
+        key = '雑線60%-65%'
+    # ステンレス304関連（「ステンレス304」を含む、または完全一致）
+    elif 'ステンレス304' in key or key in ['ステンレス', 'sus304', '304']:
+        key = 'ステンレス304'
+    # 鉛バッテリー関連（「鉛バッテリー」を含む、または完全一致）
+    elif '鉛バッテリー' in key or key in ['バッテリー', '廃バッテリー']:
+        key = '鉛バッテリー'
+    
+    return key
 
 def normalize_price(price_str):
     """価格文字列を正規化（数値を抽出してfloatで返す）"""
