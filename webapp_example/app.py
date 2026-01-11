@@ -604,37 +604,56 @@ def download_excel():
         
         if normalized_material not in price_dict[company_name_normalized]:
             price_value = normalize_price(price_data.price)
-            if price_value:
+            if price_value is not None:
                 price_dict[company_name_normalized][normalized_material] = price_value
     
     # 表に価格を記入
     for row_idx, table_company in enumerate(COMPANY_LIST, 2):
         table_company_normalized = normalize_company_name(table_company)
         
-        # price_dictから該当する企業を探す
+        # price_dictから該当する企業を探す（完全一致を優先）
         matched_company = None
-        for dict_company in price_dict.keys():
-            if (table_company_normalized == dict_company or
-                table_company_normalized in dict_company or
-                dict_company in table_company_normalized):
-                matched_company = dict_company
-                break
+        
+        # まず完全一致を試す
+        if table_company_normalized in price_dict:
+            matched_company = table_company_normalized
+        else:
+            # 完全一致しない場合、部分一致を試す（より厳格に）
+            for dict_company in price_dict.keys():
+                # 部分一致は、より長い文字列の70%以上が一致する場合のみ
+                if table_company_normalized == dict_company:
+                    matched_company = dict_company
+                    break
+                # 部分一致チェック（一方がもう一方に含まれる、かつ長さの差が小さい場合のみ）
+                min_len = min(len(table_company_normalized), len(dict_company))
+                max_len = max(len(table_company_normalized), len(dict_company))
+                if min_len > 0 and max_len > 0:
+                    # 短い方が長い方の70%以上の場合のみ部分一致とみなす
+                    if (table_company_normalized in dict_company or dict_company in table_company_normalized) and (min_len / max_len >= 0.7):
+                        matched_company = dict_company
+                        break
         
         if matched_company is None:
+            # デバッグ: マッチしなかった企業名をログ出力
+            print(f"DEBUG: 企業名マッチ失敗: {table_company} (正規化後: {table_company_normalized})")
+            print(f"DEBUG: price_dict内の企業名: {list(price_dict.keys())[:5]}...")  # 最初の5つだけ
             continue
         
         # 各材料の価格を記入
         for col_idx, table_material in enumerate(MATERIAL_LIST, 2):
             if table_material in price_dict[matched_company]:
                 price_value = price_dict[matched_company][table_material]
-                try:
-                    cell = ws_table.cell(row=row_idx, column=col_idx, value=int(price_value))
-                    cell.alignment = center_align
-                    cell.border = thin_border
-                except (ValueError, TypeError):
-                    cell = ws_table.cell(row=row_idx, column=col_idx, value=str(price_value))
-                    cell.alignment = center_align
-                    cell.border = thin_border
+                if price_value is not None:
+                    try:
+                        # 数値を整数に変換して書き込み
+                        cell = ws_table.cell(row=row_idx, column=col_idx, value=int(price_value))
+                        cell.alignment = center_align
+                        cell.border = thin_border
+                    except (ValueError, TypeError):
+                        # 変換できない場合は文字列として書き込み
+                        cell = ws_table.cell(row=row_idx, column=col_idx, value=str(price_value))
+                        cell.alignment = center_align
+                        cell.border = thin_border
     
     # 列幅を調整
     ws_table.column_dimensions['A'].width = 28  # 会社名列
@@ -644,11 +663,12 @@ def download_excel():
     
     # デバッグ用シート：データベースに保存されている全価格データを表示
     ws_debug = wb.create_sheet("デバッグ情報")
-    debug_headers = ['企業名', '材料名', '価格', '取得日時', '正規化企業名', '正規化材料名']
+    debug_headers = ['企業名', '材料名', '価格', '取得日時', '正規化企業名', '正規化材料名', 'price_dictに追加されたか']
     for col_idx, header in enumerate(debug_headers, 1):
         ws_debug.cell(row=1, column=col_idx, value=header)
     
     debug_row = 2
+    seen_combinations = set()  # 重複チェック用
     for price_data in all_prices[:500]:  # 最大500件
         company = price_data.company
         if company:
@@ -667,12 +687,35 @@ def download_excel():
                 normalized_material = value
                 break
         
+        # price_dictに追加されたかチェック
+        in_price_dict = "いいえ"
+        combination_key = (company_normalized, normalized_material)
+        if company_normalized in price_dict and normalized_material in price_dict[company_normalized]:
+            in_price_dict = "はい"
+        elif combination_key in seen_combinations:
+            in_price_dict = "重複（スキップ）"
+        
+        seen_combinations.add(combination_key)
+        
         ws_debug.cell(row=debug_row, column=1, value=company_name)
         ws_debug.cell(row=debug_row, column=2, value=material_name)
         ws_debug.cell(row=debug_row, column=3, value=price_data.price)
         ws_debug.cell(row=debug_row, column=4, value=str(price_data.scraped_at) if price_data.scraped_at else '')
         ws_debug.cell(row=debug_row, column=5, value=company_normalized)
         ws_debug.cell(row=debug_row, column=6, value=normalized_material)
+        ws_debug.cell(row=debug_row, column=7, value=in_price_dict)
+        debug_row += 1
+    
+    # price_dictのサマリーを追加
+    debug_row += 2
+    ws_debug.cell(row=debug_row, column=1, value="=== price_dict サマリー ===")
+    debug_row += 1
+    ws_debug.cell(row=debug_row, column=1, value="企業名（正規化後）")
+    ws_debug.cell(row=debug_row, column=2, value="材料数")
+    debug_row += 1
+    for comp_name, materials in price_dict.items():
+        ws_debug.cell(row=debug_row, column=1, value=comp_name)
+        ws_debug.cell(row=debug_row, column=2, value=len(materials))
         debug_row += 1
     
     # メモリに保存
@@ -752,16 +795,19 @@ def normalize_company_name(name):
     return name
 
 def normalize_price(price_str):
-    """価格文字列を正規化（数値のみを抽出）"""
+    """価格文字列を正規化（数値を抽出してfloatで返す）"""
     if not price_str:
-        return ''
+        return None
     
     # 数値を抽出
     price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', str(price_str))
     if price_match:
-        price_value = price_match.group(1).replace(',', '').replace('，', '')
-        return price_value
-    return ''
+        price_value_str = price_match.group(1).replace(',', '').replace('，', '')
+        try:
+            return float(price_value_str)
+        except ValueError:
+            return None
+    return None
 
 def apply_special_price_rules(company_name, prices):
     """特殊な価格計算ルールを適用
