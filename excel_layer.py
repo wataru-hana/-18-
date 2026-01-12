@@ -1,17 +1,123 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Excel層：STDを所定セルへ上書きするだけ（転記のみ、書式維持）
+Excel層：STDテーブルをExcelの「価格一覧表」シートに直接書き込む
+- 価格は数値型（int/float）のみ
+- normalize_key()を使ったヘッダー照合
+- company_id優先の会社行マッチング
+- 書き込み前にセルクリア
+- fullCalcOnLoadをON
 """
 
 import yaml
 import logging
+import re
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple, List
 from openpyxl import load_workbook
+from openpyxl.workbook.properties import CalcProperties
 from data_structures import STDTable, STANDARD_ITEMS
 
 logger = logging.getLogger(__name__)
+
+
+def normalize_key(key: str) -> str:
+    """キーを正規化（ExcelヘッダーとSTDキーの照合用）
+    
+    仕様：
+    - 全角スペース、半角スペースを削除
+    - 全角％→半角%に統一
+    - 「_」「-」などの記号は除去
+    - 大文字小文字は無視
+    - 同義語aliasを適用（正規化後）
+    """
+    if not key:
+        return ''
+    
+    # 文字列に変換
+    key = str(key)
+    
+    # 全角％→半角%に統一
+    key = key.replace('％', '%')
+    
+    # 全角スペース、半角スペースを削除
+    key = key.replace(' ', '').replace('　', '')
+    
+    # 記号を除去（「_」「-」など）
+    key = re.sub(r'[_\-\－＿]', '', key)
+    
+    # 大文字小文字を無視（小文字に統一）
+    key = key.lower()
+    
+    # 同義語aliasを適用（正規化後）
+    # アルミ缶関連のチェック（「アルミ缶」を含むキーはすべて「アルミ缶」に正規化）
+    if 'アルミ缶' in key or key in ['ubc', '缶', 'バラ缶', 'プレス缶']:
+        key = 'アルミ缶'
+    # ピカ銅関連
+    elif key in ['ピカ銅', 'ピカ線', '上銅']:
+        key = 'ピカ銅'
+    # 雑線80%関連
+    elif '雑線80%' in key or key in ['一本線80%', '上線80%']:
+        key = '雑線80%'
+    # 雑線60%-65%関連
+    elif '雑線60%-65%' in key or '雑60%-65%' in key or key in ['三本線60%', '上線60%']:
+        key = '雑線60%-65%'
+    # ステンレス304関連
+    elif 'ステンレス304' in key or key in ['ステンレス', 'sus304', '304']:
+        key = 'ステンレス304'
+    # 鉛バッテリー関連
+    elif '鉛バッテリー' in key or key in ['バッテリー', '廃バッテリー']:
+        key = '鉛バッテリー'
+    
+    return key
+
+
+def normalize_header_name(header: str) -> str:
+    """ヘッダー名を正規化（Excelヘッダー行から列位置を確定するため）
+    
+    全角空白/半角空白除去、改行除去、連続空白圧縮
+    """
+    if not header:
+        return ''
+    
+    header = str(header)
+    
+    # 改行を除去
+    header = header.replace('\n', '').replace('\r', '')
+    
+    # 全角スペース、半角スペースを削除
+    header = header.replace(' ', '').replace('　', '')
+    
+    # 連続空白を圧縮（既に空白を削除したので不要だが、念のため）
+    header = re.sub(r'\s+', '', header)
+    
+    return header.strip()
+
+
+def normalize_company_name(name: str) -> str:
+    """企業名を正規化（括弧や全角/半角、スペース差分を吸収）
+    
+    Args:
+        name: 企業名
+        
+    Returns:
+        正規化された企業名
+    """
+    if not name:
+        return ''
+    
+    name = str(name).strip()
+    
+    # 括弧の種類を統一（全角括弧に統一）
+    name = name.replace('(', '（').replace(')', '）')
+    
+    # 全角スペースと半角スペースを統一（全角スペースに統一）
+    name = name.replace(' ', '　')
+    
+    # 連続スペースを1つに
+    name = re.sub(r'　+', '　', name)
+    
+    return name
 
 
 def load_output_tables_config(config_path: str = 'config/output_tables.yaml') -> list:
@@ -33,15 +139,15 @@ def load_output_tables_config(config_path: str = 'config/output_tables.yaml') ->
         return []
 
 
-def load_sites_config(config_path: str = 'config/sites.yaml') -> Dict[str, str]:
+def load_sites_config(config_path: str = 'config/sites.yaml') -> Dict[str, Dict[str, str]]:
     """
-    sites.yamlからcompany_idと正式社名のマッピングを読み込む
+    sites.yamlからcompany_id、company_name、正規化後のcompany_nameのマッピングを読み込む
     
     Args:
         config_path: sites.yamlのパス
         
     Returns:
-        {company_id: company_name} の辞書
+        {company_id: {'name': company_name, 'normalized_name': normalized_name}} の辞書
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
@@ -49,33 +155,18 @@ def load_sites_config(config_path: str = 'config/sites.yaml') -> Dict[str, str]:
             sites = config.get('sites', [])
             result = {}
             for site in sites:
-                company_id = site.get('id') or site.get('name', '')
+                company_id = site.get('id') or site.get('company_id') or site.get('name', '')
                 company_name = site.get('name', '')
                 if company_id and company_name:
-                    result[company_id] = company_name
+                    normalized_name = normalize_company_name(company_name)
+                    result[company_id] = {
+                        'name': company_name,
+                        'normalized_name': normalized_name
+                    }
             return result
     except Exception as e:
         logger.warning(f"sites.yamlの読み込みエラー: {str(e)}")
         return {}
-
-
-def normalize_company_name_for_excel(name: str) -> str:
-    """
-    企業名をExcel用に正規化（既存のExcelとマッチングするため）
-    
-    Args:
-        name: 企業名
-        
-    Returns:
-        正規化された企業名
-    """
-    if not name:
-        return ''
-    
-    # 基本的にはそのまま返す（既存の実装に合わせる）
-    # 必要に応じて、スペースの統一などを行う
-    name = str(name).strip()
-    return name
 
 
 def find_sheet_in_workbook(wb, target_sheet_name: str) -> Optional[str]:
@@ -98,19 +189,50 @@ def find_sheet_in_workbook(wb, target_sheet_name: str) -> Optional[str]:
     return None
 
 
+def extract_numeric_price(price) -> Optional[float]:
+    """価格を数値型に変換（文字列の場合は数値のみを抽出）
+    
+    Args:
+        price: 価格（int, float, str, Noneなど）
+        
+    Returns:
+        数値（float）またはNone
+    """
+    if price is None:
+        return None
+    
+    # 既に数値型の場合はそのまま
+    if isinstance(price, (int, float)):
+        return float(price)
+    
+    # 文字列の場合、数値を抽出
+    if isinstance(price, str):
+        # 数値を抽出（カンマや円マークを除去）
+        price_match = re.search(r'(\d{1,4}(?:[,，]\d{3})*(?:\.\d+)?)', str(price))
+        if price_match:
+            price_value_str = price_match.group(1).replace(',', '').replace('，', '')
+            try:
+                return float(price_value_str)
+            except ValueError:
+                return None
+    
+    return None
+
+
 def write_std_to_excel(
     std_table: STDTable,
     output_tables_config_path: str = 'config/output_tables.yaml',
     sites_config_path: str = 'config/sites.yaml'
 ) -> bool:
     """
-    STDテーブルをExcelに転記する
+    STDテーブルをExcelの「価格一覧表」シートに直接書き込む
     
     処理内容:
-    - output_tables.yamlに従って、指定されたExcelファイル・シートに転記
-    - Noneは空欄にする
-    - 既存の書式・罫線・数式を壊さない（セルの値のみを上書き）
-    - マッピング、補正、税計算は一切行わない（転記のみ）
+    - 価格は数値型（int/float）のみ書き込む
+    - ヘッダー行から列位置を確定（normalize_key()を使用）
+    - 会社行の特定はcompany_idを最優先、次にcompany_name正規化一致
+    - 書き込み前にセルをクリア
+    - fullCalcOnLoadをON
     
     Args:
         std_table: STDテーブル
@@ -121,7 +243,7 @@ def write_std_to_excel(
         成功した場合True、失敗した場合False
     """
     output_tables = load_output_tables_config(output_tables_config_path)
-    company_id_to_name = load_sites_config(sites_config_path)
+    company_info = load_sites_config(sites_config_path)
     
     if not output_tables:
         logger.warning("output_tables.yamlに設定がありません")
@@ -154,6 +276,19 @@ def write_std_to_excel(
             
             wb = load_workbook(excel_file)
             
+            # fullCalcOnLoadをON（開いた瞬間に再計算されるように）
+            if getattr(wb, "calculation", None) is None:
+                wb.calculation = CalcProperties()
+            
+            # 開いた瞬間に再計算させたい
+            wb.calculation.fullCalcOnLoad = True
+            
+            # openpyxlのバージョン差異があるので、存在する属性だけ設定
+            if hasattr(wb.calculation, "calcMode"):
+                wb.calculation.calcMode = "auto"
+            if hasattr(wb.calculation, "forceFullCalc"):
+                wb.calculation.forceFullCalc = True
+            
             # シートを探す
             actual_sheet_name = find_sheet_in_workbook(wb, sheet_name)
             if not actual_sheet_name:
@@ -164,95 +299,118 @@ def write_std_to_excel(
             ws = wb[actual_sheet_name]
             logger.info(f"シート「{actual_sheet_name}」を読み込みました")
             
-            # ヘッダー行（1行目、2列目以降）から材料名と列番号のマッピングを作成
-            header_materials = {}
+            # ヘッダー行（1行目、2列目以降）から材料名と列番号のマッピングを作成（normalize_key()を使用）
+            header_to_col: Dict[str, int] = {}  # 正規化後のヘッダー名 -> 列番号
+            header_original: Dict[str, str] = {}  # 正規化後のヘッダー名 -> 元のヘッダー名
+            
             for col_idx in range(2, ws.max_column + 1):  # 2列目から（1列目は企業名）
                 cell = ws.cell(row=1, column=col_idx)
                 if cell.value:
-                    header_name = str(cell.value).strip()
-                    header_materials[header_name] = col_idx
+                    header_name = normalize_header_name(str(cell.value))
+                    if header_name:
+                        normalized_header = normalize_key(header_name)
+                        if normalized_header:
+                            header_to_col[normalized_header] = col_idx
+                            header_original[normalized_header] = str(cell.value).strip()
             
-            logger.info(f"ヘッダー材料: {list(header_materials.keys())}")
+            logger.info(f"ヘッダー材料（正規化後）: {list(header_to_col.keys())[:10]}...")  # 最初の10個だけ
             
             # 企業名列（1列目）から企業名と行番号のマッピングを作成
-            company_rows = {}
+            company_rows: Dict[str, int] = {}  # 正規化後の企業名 -> 行番号
+            company_original: Dict[str, str] = {}  # 正規化後の企業名 -> 元の企業名
+            
             for row_idx in range(2, ws.max_row + 1):
                 cell = ws.cell(row=row_idx, column=1)
                 if cell.value:
                     company_name = str(cell.value).strip()
-                    normalized_name = normalize_company_name_for_excel(company_name)
-                    company_rows[normalized_name] = row_idx
+                    normalized_company_name = normalize_company_name(company_name)
+                    if normalized_company_name:
+                        company_rows[normalized_company_name] = row_idx
+                        company_original[normalized_company_name] = company_name
             
             logger.info(f"既存の企業: {len(company_rows)}社")
             
             # STDテーブルをExcelに転記
             total_filled_count = 0
+            total_companies = 0
+            
             for company_id, items in std_table.items():
-                # 行番号を取得（優先順位: 1. company_id, 2. 正式社名）
-                row_idx = None
-                matched_by = None
+                total_companies += 1
+                row_idx: Optional[int] = None
+                matched_by: Optional[str] = None
                 
-                # 1. company_idで探索
-                normalized_company_id = normalize_company_name_for_excel(company_id)
+                # 1. company_idで探索（最優先）
+                normalized_company_id = normalize_company_name(company_id)
                 row_idx = company_rows.get(normalized_company_id)
                 if row_idx:
                     matched_by = 'company_id'
-                else:
-                    # 2. 正式社名で探索
-                    if company_id in company_id_to_name:
-                        company_name = company_id_to_name[company_id]
-                        normalized_company_name = normalize_company_name_for_excel(company_name)
-                        row_idx = company_rows.get(normalized_company_name)
-                        if row_idx:
-                            matched_by = 'company_name'
+                
+                # 2. company_nameで探索（company_idで見つからない場合）
+                if not row_idx and company_id in company_info:
+                    company_name = company_info[company_id]['name']
+                    normalized_company_name = company_info[company_id]['normalized_name']
+                    row_idx = company_rows.get(normalized_company_name)
+                    if row_idx:
+                        matched_by = 'company_name'
                 
                 if not row_idx:
                     logger.warning(f"企業が見つかりません（スキップ）: {company_id}")
                     continue
                 
-                # matched_byをログに出力
-                logger.debug(f"  {company_id}: matched_by={matched_by}")
-                
                 # 各標準品目の価格を転記
                 company_filled_count = 0
-                for item_std, price in items.items():
-                    # 列番号を取得（ヘッダー名でマッチング）
-                    # 全角スペースと半角スペースの違いを考慮
-                    col_idx = header_materials.get(item_std)
+                company_skipped_count = 0
+                written_cells: List[Tuple[str, int, int, float]] = []  # (std_key, row, col, value)のリスト
+                
+                for std_key, price in items.items():
+                    # STDキーを正規化
+                    normalized_std_key = normalize_key(std_key)
+                    
+                    # 正規化後のキーでヘッダーから列番号を取得
+                    col_idx = header_to_col.get(normalized_std_key)
+                    
                     if not col_idx:
-                        # 全角スペースを半角に変換して再試行
-                        item_std_alt = item_std.replace('　', ' ')
-                        col_idx = header_materials.get(item_std_alt)
-                    if not col_idx:
-                        # 半角スペースを全角に変換して再試行
-                        item_std_alt = item_std.replace(' ', '　')
-                        col_idx = header_materials.get(item_std_alt)
-                    if not col_idx:
-                        logger.debug(f"材料が見つかりません（スキップ）: {item_std}")
+                        company_skipped_count += 1
+                        logger.debug(f"  材料が見つかりません（スキップ）: {std_key} (正規化後: {normalized_std_key})")
                         continue
                     
-                    # セルに値を転記（Noneの場合は空欄にする）
+                    # 価格を数値型に変換
+                    numeric_price = extract_numeric_price(price)
+                    
+                    # セルをクリアしてから書き込み
                     cell = ws.cell(row=row_idx, column=col_idx)
-                    if price is not None:
-                        cell.value = price
+                    cell.value = None  # 一旦クリア
+                    
+                    if numeric_price is not None:
+                        # 数値を整数に変換して書き込み（小数点以下は切り捨て）
+                        cell.value = int(numeric_price)
                         company_filled_count += 1
                         total_filled_count += 1
-                    else:
-                        # Noneの場合は空欄にする（既存の値を削除）
-                        cell.value = None
+                        written_cells.append((std_key, row_idx, col_idx, numeric_price))
+                        
+                        # MATCHEDログ出力
+                        logger.debug(f"MATCHED: {company_id}, {std_key}, {header_original.get(normalized_std_key, '')}, {numeric_price}")
                 
+                # 会社ごとのログ出力
                 if company_filled_count > 0:
-                    logger.info(f"  {company_id}: {company_filled_count}件の価格を転記 (matched_by={matched_by})")
+                    logger.info(f"  {company_id}: {company_filled_count}件の価格を転記 (matched_by={matched_by}, スキップ={company_skipped_count})")
+                    
+                    # 最初の会社のみ、実際に書いたセルのサンプルを10件出力
+                    if total_companies == 1 and written_cells:
+                        logger.info(f"    サンプル（最初の10件）:")
+                        for std_key, row, col, value in written_cells[:10]:
+                            logger.info(f"      ({company_id}, {std_key}, row={row}, col={col}, value={value})")
+                else:
+                    logger.warning(f"  {company_id}: 転記できたセルが0件 (matched_by={matched_by}, スキップ={company_skipped_count})")
             
             # ファイルを保存
             wb.save(excel_file)
-            logger.info(f"✓ {excel_file} - {sheet_name} に転記完了（合計{total_filled_count}件）")
+            logger.info(f"✓ {excel_file} - {sheet_name} に転記完了（合計{total_filled_count}件、{total_companies}社）")
             success_count += 1
             
         except Exception as e:
-            logger.error(f"エラー: {excel_file} - {sheet_name} - {str(e)}")
+            logger.error(f"エラー: {excel_file} - {sheet_name} - {str(e)}", exc_info=True)
             continue
     
     logger.info(f"\nExcel転記完了: {success_count}/{len([t for t in output_tables if t.get('enabled', True)])} シート")
     return success_count > 0
-
