@@ -274,7 +274,9 @@ def write_std_to_excel(
                 logger.error(f"Excelファイルが見つかりません: {excel_file}")
                 continue
             
-            wb = load_workbook(excel_file)
+            # 数式を保持するためにdata_only=Falseで読み込む（デフォルト）
+            # 既存のシート（特にデバッグ情報シート）の数式を壊さないように注意
+            wb = load_workbook(excel_file, data_only=False)
             
             # fullCalcOnLoadをON（開いた瞬間に再計算されるように）
             if getattr(wb, "calculation", None) is None:
@@ -403,10 +405,22 @@ def write_std_to_excel(
                 else:
                     logger.warning(f"  {company_id}: 転記できたセルが0件 (matched_by={matched_by}, スキップ={company_skipped_count})")
             
-            # ファイルを保存
-            wb.save(excel_file)
-            logger.info(f"✓ {excel_file} - {sheet_name} に転記完了（合計{total_filled_count}件、{total_companies}社）")
-            success_count += 1
+            # ファイルを保存（数式を保持するため、通常の保存を使用）
+            # 既存のシート（特にデバッグ情報シート）の数式を壊さないように注意
+            try:
+                wb.save(excel_file)
+                logger.info(f"✓ {excel_file} - {sheet_name} に転記完了（合計{total_filled_count}件、{total_companies}社）")
+                success_count += 1
+            except Exception as save_error:
+                logger.error(f"Excelファイルの保存エラー: {str(save_error)}")
+                # バックアップファイル名で保存を試みる
+                backup_file = str(excel_path.with_suffix('.backup.xlsx'))
+                try:
+                    wb.save(backup_file)
+                    logger.warning(f"バックアップファイルに保存しました: {backup_file}")
+                except Exception as backup_error:
+                    logger.error(f"バックアップ保存も失敗: {str(backup_error)}")
+                raise
             
         except Exception as e:
             logger.error(f"エラー: {excel_file} - {sheet_name} - {str(e)}", exc_info=True)
