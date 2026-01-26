@@ -552,6 +552,26 @@ def build_std_table(
                 for r in matching_records:
                     logger.info(f"    - item_raw='{r.item_raw}', price={r.price}, tax_hint={r.tax_hint}")
     
+    # デバッグ: haruhi_shokai_ichinomiya_hqのRAWレコードを出力
+    haruhi_records = [r for r in raw_records if r.company_id == 'haruhi_shokai_ichinomiya_hq']
+    if haruhi_records:
+        logger.info(f"\n[haruhi_shokai_ichinomiya_hq] RAWレコード解析:")
+        # item_rawのユニーク一覧
+        unique_item_raws = list(set(r.item_raw for r in haruhi_records))
+        logger.info(f"  raw unique item_names: {sorted(unique_item_raws)}")
+        logger.info(f"  item_raw ユニーク一覧 ({len(unique_item_raws)}件):")
+        for item in sorted(unique_item_raws):
+            logger.info(f"    - \"{item}\"")
+        
+        # 雑線関連のitem_rawを抽出
+        zassen_keywords = ["雑線80%", "雑線60%-65%", "一本線", "三本線"]
+        for keyword in zassen_keywords:
+            matching_records = [r for r in haruhi_records if keyword in r.item_raw]
+            if matching_records:
+                logger.info(f"\n  [haruhi] RAW hits for keyword='{keyword}':")
+                for r in matching_records:
+                    logger.info(f"    - item_raw='{r.item_raw}', price={r.price}, tax_hint={r.tax_hint}")
+    
     # RAWレコードごとに処理（まず候補を収集）
     for raw_record in raw_records:
         company_id = raw_record.company_id
@@ -716,6 +736,88 @@ def build_std_table(
             duration_seconds=duration
         )
         log_run_log(run_log)
+    
+    # 派生生成：春日商会の支店（富山/滋賀）を一宮本社から生成
+    std_table = add_derived_branches(std_table)
+    
+    return std_table
+
+
+def apply_offset_to_items(items: Dict[str, Optional[int]], offset: int) -> Dict[str, Optional[int]]:
+    """
+    アイテム辞書にオフセットを適用
+    
+    Args:
+        items: アイテム辞書 {item_std: price}
+        offset: 適用するオフセット（負数）
+        
+    Returns:
+        オフセット適用後のアイテム辞書
+    """
+    result = {}
+    for item_std, price in items.items():
+        if price is None:
+            # Noneの場合はNoneのまま（推測禁止）
+            result[item_std] = None
+        else:
+            # 数値の場合、オフセットを適用
+            new_price = price + offset
+            result[item_std] = new_price
+    return result
+
+
+def add_derived_branches(std_table: STDTable) -> STDTable:
+    """
+    春日商会の支店（富山/滋賀）を一宮本社から派生生成
+    
+    富山支店 = 一宮本社 - 4円
+    滋賀支店 = 一宮本社 - 2円
+    
+    Args:
+        std_table: STDテーブル
+        
+    Returns:
+        派生生成後のSTDテーブル
+    """
+    base_company_id = 'haruhi_shokai_ichinomiya_hq'
+    
+    # 一宮本社が存在しない場合は何もしない
+    if base_company_id not in std_table:
+        return std_table
+    
+    base_items = std_table[base_company_id]
+    
+    # 富山支店を生成（-4円）
+    toyama_company_id = 'haruhi_shokai_toyama'
+    if toyama_company_id not in std_table:
+        std_table[toyama_company_id] = apply_offset_to_items(base_items, -4)
+        logger.info(f"派生生成: {toyama_company_id} = {base_company_id} -4円")
+        
+        # デバッグログ：代表値の差分を確認
+        sample_items = ['ピカ銅', '並銅', '雑線80%']
+        for item in sample_items:
+            base_price = base_items.get(item)
+            toyama_price = std_table[toyama_company_id].get(item)
+            if base_price is not None and toyama_price is not None:
+                logger.info(f"  derived {toyama_company_id} {item}: {base_price} -> {toyama_price}")
+    else:
+        logger.warning(f"{toyama_company_id} は既にSTDテーブルに存在します。派生生成をスキップします。")
+    
+    # 滋賀支店を生成（-2円）
+    shiga_company_id = 'haruhi_shokai_shiga'
+    if shiga_company_id not in std_table:
+        std_table[shiga_company_id] = apply_offset_to_items(base_items, -2)
+        logger.info(f"派生生成: {shiga_company_id} = {base_company_id} -2円")
+        
+        # デバッグログ：代表値の差分を確認
+        sample_items = ['ピカ銅', '並銅', '雑線80%']
+        for item in sample_items:
+            base_price = base_items.get(item)
+            shiga_price = std_table[shiga_company_id].get(item)
+            if base_price is not None and shiga_price is not None:
+                logger.info(f"  derived {shiga_company_id} {item}: {base_price} -> {shiga_price}")
+    else:
+        logger.warning(f"{shiga_company_id} は既にSTDテーブルに存在します。派生生成をスキップします。")
     
     return std_table
 

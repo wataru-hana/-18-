@@ -19,9 +19,10 @@ sites:
 
   # 3. 木村金属（大阪）
   - category: 2
-    extractor_type: auto
+    extractor_type: kimura_price_cards
+    id: kimura_metal_osaka
     name: 木村金属（大阪）
-    price_url: https://kimura-metal.co.jp/price.html#07-01
+    price_url: https://kimura-metal.co.jp/
     region: 大阪
 
   # 4. 明鑫貿易株式会社
@@ -75,25 +76,33 @@ sites:
     price_url: https://houyama.com/price.html
     region: 兵庫
 
-  # 11. 株式会社 春日商会　富山支店
+  # 11. 株式会社 春日商会　富山支店（派生生成：一宮本社 -4円）
   - category: 2
-    extractor_type: auto
+    extractor_type: derived_from
+    id: haruhi_shokai_toyama
     name: 株式会社 春日商会　富山支店
-    price_url: https://haruhi-shokai.com/scrap_nonferrous2.html
+    derived_from: haruhi_shokai_ichinomiya_hq
+    offset: -4
     region: 富山
 
-  # 12. 株式会社 春日商会　滋賀支店
+  # 12. 株式会社 春日商会　滋賀支店（派生生成：一宮本社 -2円）
   - category: 2
-    extractor_type: auto
+    extractor_type: derived_from
+    id: haruhi_shokai_shiga
     name: 株式会社 春日商会　滋賀支店
-    price_url: https://haruhi-shokai.com/scrap_nonferrous3.html
+    derived_from: haruhi_shokai_ichinomiya_hq
+    offset: -2
     region: 滋賀
 
   # 13. 株式会社 春日商会　一宮本社
   - category: 2
     extractor_type: haruhi_table
+    id: haruhi_shokai_ichinomiya_hq
     name: 株式会社 春日商会　一宮本社
     price_url: https://haruhi-shokai.com/scrap_nonferrous1.html
+    price_urls:
+      - https://haruhi-shokai.com/scrap_nonferrous1.html
+      - https://haruhi-shokai.com/scrap_misc1.html
     region: 愛知
 
   # 14. 安城貿易（愛知）
@@ -170,3 +179,66 @@ sites:
     name: 高橋商事株式会社
     price_url: http://www.takahashisyouji.co.jp/index.html
     region: 山梨
+
+  # 22. 日中金属貿易（和歌山本社買取ヤード）
+  - category: 2
+    extractor_type: nittyuu_home_yards
+    id: nittyuu_wakayama_yard
+    name: 日中金属貿易（和歌山本社買取ヤード）
+    price_url: https://nittyuu.co.jp/
+    yard_key: wakayama
+    region: 和歌山
+
+  # 23. 日中金属貿易（山梨営業所買取ヤード）
+  - category: 2
+    extractor_type: nittyuu_home_yards
+    id: nittyuu_yamanashi_yard
+    name: 日中金属貿易（山梨営業所買取ヤード）
+    price_url: https://nittyuu.co.jp/
+    yard_key: yamanashi
+    region: 山梨
+
+  # 24. ウチダメタル（伊丹本社）
+  - category: 2
+    extractor_type: uchida_categories
+    id: uchida_itami
+    name: ウチダメタル（伊丹本社）
+    price_urls:
+      - https://uchidametal.com/kakaku/dou/
+      - https://uchidametal.com/kakaku/densen/
+      - https://uchidametal.com/kakaku/shinchu/
+      - https://uchidametal.com/kakaku/alumi/
+      - https://uchidametal.com/kakaku/sus/
+      - https://uchidametal.com/kakaku/bt/
+    yard_key: itami
+    region: 兵庫
+
+  # 25. ウチダメタル（名塩工場）
+  - category: 2
+    extractor_type: uchida_categories
+    id: uchida_najio
+    name: ウチダメタル（名塩工場）
+    price_urls:
+      - https://uchidametal.com/kakaku/dou/
+      - https://uchidametal.com/kakaku/densen/
+      - https://uchidametal.com/kakaku/shinchu/
+      - https://uchidametal.com/kakaku/alumi/
+      - https://uchidametal.com/kakaku/sus/
+      - https://uchidametal.com/kakaku/bt/
+    yard_key: najio
+    region: 兵庫
+
+  # 26. ウチダメタル（和歌山工場）
+  - category: 2
+    extractor_type: uchida_categories
+    id: uchida_wakayama
+    name: ウチダメタル（和歌山工場）
+    price_urls:
+      - https://uchidametal.com/kakaku/dou/
+      - https://uchidametal.com/kakaku/densen/
+      - https://uchidametal.com/kakaku/shinchu/
+      - https://uchidametal.com/kakaku/alumi/
+      - https://uchidametal.com/kakaku/sus/
+      - https://uchidametal.com/kakaku/bt/
+    yard_key: wakayama
+    region: 和歌山

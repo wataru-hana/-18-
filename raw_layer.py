@@ -193,6 +193,12 @@ def scrape_all_companies_raw(
         company_id = site_config.get('id') or site_config.get('company_id') or site_config.get('name', '')
         company_name = site_config.get('name', '')
         category = site_config.get('category', 2)
+        extractor_type = site_config.get('extractor_type', 'auto')
+        
+        # 派生生成（derived_from）の会社はスクレイピングをスキップ
+        if extractor_type == 'derived_from':
+            logger.info(f"スキップ: {company_name} ({company_id}) - 派生生成のためスクレイピング不要")
+            continue
         
         logger.info(f"スクレイピング中: {company_name} ({company_id})")
         
